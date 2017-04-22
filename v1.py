@@ -1,6 +1,7 @@
 import sys, os
 from math import sqrt
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.stats.stats import pearsonr
 
 #-----------------------------------------------------------------------
@@ -63,6 +64,19 @@ def parsePDBMultiConf(infile) :
 			d_PDB[conformation][n_res][atome]["id"] = identifiant
 
 	return d_PDB
+
+#-----------------------------------------------------------------------
+def timeList (infile): #Recupere et met dans un liste le temps des differentes conformations
+    time = []
+    file = open(infile,"r")
+    lines = file.readlines()
+    for line in lines :
+        if line[0:5] == "TITLE":
+            timet=line[65:80].strip()
+            time.append(timet)
+    #print temps
+    file.close()
+    return(time)
 
 #-----------------------------------------------------------------------
 def	usage(arguments) :
@@ -174,7 +188,7 @@ def centreMasseResCa(d_prot) :
 		Le centre de masse d'un residus correspond a la position de son
 		carbone alpha
 		
-		@param diconnaire de la proteine avec une ou plusieurs 
+		@param dictionnaire de la proteine avec une ou plusieurs 
 		conformations
 		@return dictionnaire de la proteine avec la valeur des centres
 		de masse "CA" des residus ajoutes
@@ -309,6 +323,25 @@ def corEnfouissementFlexibilite(d_prot) :
 	pearsonr
 
 
+
+def plotRMSD_Giration(listRMSD, listGiration):
+	y=np.array(listRMSD)
+	x=np.array(listGiration)
+	plt.scatter(x,y,c='red')
+	axes = plt.gca()
+	axes.set_xlim(-30, 2100)
+	axes.set_ylim(-1,25)
+	plt.title('RMSD en fonction de la Giration')
+	plt.legend(['RMSD','Giration'])
+	plt.show()
+
+def plotRMSD_Temps(listRMSD, listTemps):
+
+def plotGiration_Temps(listGiration, listTemps):
+
+
+
+
 #-----------------------------------------------------------------------
 # MAIN
 
@@ -341,9 +374,32 @@ if __name__ == '__main__':
 	# Methode de calcul du centre de masse
 	meth = sys.argv[3]
 
-	print d_conf
+
 	
 	
 	# enfouissement = d_
 	# pour chaque conformation --> calcul de la correlation entre
 	plt.plot
+
+
+
+#PLAN
+	#Changements conformationnels globaux
+
+		#Calcul rayon de Giration (distance entre CdM et residu le plus eloigne du CdM)
+		#et RMSD de toutes les conformations par rapport a la ref
+
+		#Representation de la variation Giration/RMSD, Giration/Temps, RMSD/Temps.
+
+	#Changements conformationnels locaux
+	
+		#RMSD de chaque residu de chaque conformation par rapport à sa position dans la ref
+			#Region flexible = region dont residus ont un grand RMSD
+
+		#Enfouissement : Calcul distance entre CdM de chaque residu et CdM du centre de la prot
+
+		#Comparer enfouissement des residus et RMSD des residus
+			#Regions flexibles enfouies ou en surface ?
+
+		#Calcul RMSD et Enfouissement moyen pour chaque residu de chaque conformation vs reference
+			#Representation Graphique
