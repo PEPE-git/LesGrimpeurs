@@ -1,6 +1,6 @@
 
 
-# usage : python v1.py start_prot_only.pdb md_prot_only_skip10.pdb
+# usage : python v1.py start_prot_only.pdb md_prot_only_skip100.pdb
 
 import sys, os
 from math import sqrt
@@ -18,7 +18,7 @@ import numpy as np
 
 	#Changements conformationnels locaux
 	
-		#RMSD de chaque residu de chaque conformation par rapport à sa position dans la ref
+		#RMSD de chaque residu de chaque conformation par rapport a sa position dans la ref
 			#Region flexible = region dont residus ont un grand RMSD
 
 		#Enfouissement : Calcul distance entre CdM de chaque residu et CdM du centre de la prot
@@ -300,10 +300,15 @@ def RMSDresidus(d_ref, d_conf, centreMasse) :
 			yconf = d_conf[conf][resid][centreMasse]["y"]
 			zconf = d_conf[conf][resid][centreMasse]["z"]
 			
-			d_conf[conf]["RMSD"].append((xref-xconf)**2 + (yref-yconf)**2 + (zref-zconf)**2)
+			d_conf[conf]["RMSD"].append(sqrt((xref-xconf)**2 + (yref-yconf)**2 + (zref-zconf)**2))
 
 	return d_conf
-
+	
+def RMSDconf(dico) :
+	dico["RMSDmoy"] = list()
+	for conf in d_conf["liste_conformations"] :
+		dico["RMSDmoy"].append(np.mean(d_conf[conf]["RMSD"]))
+	return dico["RMSDmoy"]
 
 #-----------------------------------------------------------------------
 # DISTANCE --> Calcul de la distance de chaque residu au centre de Masse
@@ -370,9 +375,9 @@ def plotRMSD_Giration(listRMSD, listGiration):
 	plt.legend(['RMSD','Giration'])
 	plt.show()
 
-def plotRMSD_Temps(listRMSD, listTemps):
+#~ def plotRMSD_Temps(listRMSD, listTemps):
 
-def plotGiration_Temps(listGiration, listTemps):
+#~ def plotGiration_Temps(listGiration, listTemps):
 
 #-----------------------------------------------------------------------
 # Ecriture des resultats
@@ -460,7 +465,9 @@ if __name__ == '__main__':
 	#~ plt.plot(rayGiration)
 	
 	# pour chaque conformation --> calcul de la correlation entre
-	correlation = corEnfouissementFlexibilite(d_conf)
+	#~ correlation = corEnfouissementFlexibilite(d_conf)
 	#~ print correlation
-	plt.plot(correlation)
+	#~ plt.plot(correlation)
+		
+	plt.plot(RMSDconf(d_conf))
 	plt.show()
