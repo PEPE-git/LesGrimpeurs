@@ -1,6 +1,6 @@
 
 
-# usage : python v1.py start_prot_only.pdb md_prot_only_skip100.pdb
+# usage : python v1.py start_prot_only.pdb md_prot_only_skip100.pdb CA
 
 import sys, os
 from math import sqrt
@@ -31,26 +31,23 @@ import numpy as np
 
 #-----------------------------------------------------------------------
 def	usage(arguments) :
-	
 	if len(arguments) != 4 :
-		print "Mauvais usage de Barstar \n Arguments necessaires  <fileRef.pdb> <fileConf.pdb> <nom_atome>"
-		print "fileRef.pdb : fichier pdb contenant la conformation de reference"
-		print "fileConf.pdb : fichiers pdb contenant les conformations issues de la dynamique moleculaire"
-		print "nom_atome : CA ou all --> calcul du RMSD"
-		sys.exit(0)
+		erreurMes()
 	if ((arguments[3] != 'CA') & (arguments[3] != 'all')) :
-		print "Mauvais usage de Barstar \n Arguments necessaires  <fileRef.pdb> <fileConf.pdb> <nom_atome>"
-		print "fileRef.pdb : fichier pdb contenant la conformation de reference"
-		print "fileConf.pdb : fichiers pdb contenant les conformations issues de la dynamique moleculaire"
-		print "nom_atome : CA ou all --> calcul du RMSD"
-		sys.exit(0)
+		erreurMes()
 
+def erreurMes() :
+	print "ATTENTION : Mauvais usage de Barstar \nArguments necessaires :\t<fileRef.pdb> <fileConf.pdb> <nom_atome>\n"
+	print "fileRef.pdb :\t\tfichier pdb contenant la conformation de reference"
+	print "fileConf.pdb :\t\tfichiers pdb contenant les conformations issues de la dynamique moleculaire"
+	print "nom_atome :\t\tCA ou all (Methode de calcul du centre de masse)"
+	sys.exit(0)
 
 #-----------------------------------------------------------------------
 def parsePDBMultiConf(infile) :
 	"""
-		Cette fonction permet de parser un fichier pdb. Conversion en 
-		dictionnaire directement utilisable dans le script.
+	Cette fonction permet de parser un fichier pdb. Conversion en 
+	dictionnaire directement utilisable dans le script.
 	"""
 
 	try:
@@ -66,7 +63,7 @@ def parsePDBMultiConf(infile) :
 
 	for element in lines :		
 		if element[0:5] == "MODEL" :
-			conformation = element[13:17]
+			conformation = element[10:14]
 			d_PDB["liste_conformations"].append(conformation)
 			d_PDB[conformation] = dict()
 			d_PDB[conformation]["liste_n_residus"] = list()
@@ -162,7 +159,7 @@ def timeList (infile): #Recupere et met dans un liste le temps des differentes c
 #-----------------------------------------------------------------------
 # CENTRE DE MASSE
 
-def centreMasseProteine(d_prot, centreMasse) :
+def centreMasseProteine(d_prot) :
 	'''
 		Fonction qui calcule le centre de masse des proteines. Cela
 		correspond a la position moyenne des residus la constituant.
@@ -170,49 +167,53 @@ def centreMasseProteine(d_prot, centreMasse) :
 		@param : indique la methode du calcul de centre de masse CM_CA ou CM_moyAll
 	'''
 	
+	global centreMasse
+	
+	l_CM = []
 	l_CMx = [] # stockage des coordonnees des CM des residus sur l'axe x
 	l_CMy = [] # stockage des coordonnees des CM des residus sur l'axe y
 	l_CMz = [] # stockage des coordonnees des CM des residus sur l'axe z
 		
 	for conf in d_prot["liste_conformations"] :
-		l_CM = [0,0,0] # liste de la somme des coordonnees des CM
+		l_CM = [list(),list(),list()] # liste de la somme des coordonnees des CM
 		cpt = 0 # cpt du nombre de residus
 		
 		for resid in d_prot[conf]["liste_n_residus"] :
 			cpt += 1
-			l_CM[0] += d_prot[conf][resid][centreMasse]["x"]
-			l_CM[1] += d_prot[conf][resid][centreMasse]["y"]
-			l_CM[2] += d_prot[conf][resid][centreMasse]["z"]
-		l_CMx.append(l_CM[0]/cpt)
-		l_CMy.append(l_CM[1]/cpt)
-		l_CMz.append(l_CM[2]/cpt)
+			l_CM[0].append(d_prot[conf][resid][centreMasse]["x"])
+			l_CM[1].append(d_prot[conf][resid][centreMasse]["y"])
+			l_CM[2].append(d_prot[conf][resid][centreMasse]["z"])
+		l_CMx.append(moyenne(l_CM[0]))
+		l_CMy.append(moyenne(l_CM[1]))
+		l_CMz.append(moyenne(l_CM[2]))
 	d_prot["liste_CM_x"] = l_CMx
 	d_prot["liste_CM_y"] = l_CMy
 	d_prot["liste_CM_z"] = l_CMz
 	
 	return d_prot
 
-def centreMasseResidus(d_prot, meth) :
+def centreMasseResidus(d_prot) :
 	'''
-		Le centre d'un masse d'un residus peut etre considere comme etant :
-			- la position moyenne de ses atomes
-			- la position de ses carbones alpha
+	Le centre d'un masse d'un residus peut etre considere comme etant :
+		- la position moyenne de ses atomes
+		- la position de ses carbones alpha
 	'''
-	if meth == "CM_CA" :
+	global centreMasse
+	
+	if centreMasse == "CM_CA" :
 		return centreMasseResCa(d_prot)
 	return centreMasseResAll(d_prot)
 
 
 def centreMasseResCa(d_prot) :
 	'''		
-		Fonction qui calcule le centre de masse des residus
-		Le centre de masse d'un residus correspond a la position de son
-		carbone alpha
-		
-		@param diconnaire de la proteine avec une ou plusieurs 
-		conformations
-		@return dictionnaire de la proteine avec la valeur des centres
-		de masse "CA" des residus ajoutes
+	Fonction qui calcule le centre de masse des residus
+	Le centre de masse d'un residus correspond a la position de son
+	carbone alpha
+	
+	@param diconnaire de la proteine avec une ou plusieurs conformations
+	@return dictionnaire de la proteine avec la valeur des centres
+	de masse "CA" des residus ajoutes
 	'''
 	
 	# Pour toutes les conformations de la proteine
@@ -236,24 +237,23 @@ def centreMasseResCa(d_prot) :
 
 def centreMasseResAll(d_prot) :
 	'''		
-		Fonction qui calcule le centre de masse des residus
-		Le centre de masse d'un residus correspond a la position moyenne
-		des atomes le constituant
-		
-		@param dictionnaire de la proteine avec une ou plusieurs 
-		conformations
-		@return dictionnaire de la proteine avec la valeur des centres
-		de masse "all" des residus ajoutes
+	Fonction qui calcule le centre de masse des residus
+	Le centre de masse d'un residus correspond a la position moyenne
+	des atomes le constituant
+	
+	@param dictionnaire de la proteine avec une ou plusieurs conformations
+	@return dictionnaire de la proteine avec la valeur des centres de masse 
+	"all" des residus ajoutes
 	'''
 	
 	# Pour toutes les conformations de la proteine
 	for conf in d_prot["liste_conformations"] :
 		# Pour tous les residus de chaque conformation de la proteine
 		for resid in d_PDB[conf]["liste_n_residus"] :
-			cpt = 0
-			sumx = 0
-			sumy = 0
-			sumz = 0
+			lcoord = list()
+			lcoord[0] = list() # stockage coordonnees x
+			lcoord[1] = list() # stockage coordonnees y
+			lcoord[2] = list() # stockage coordonnees z
 			# Pour tous les atomes de chaque residus
 
 			d_prot[conf]["CM_res"]["x"] = list()
@@ -261,18 +261,21 @@ def centreMasseResAll(d_prot) :
 			d_prot[conf]["CM_res"]["z"] = list()
 
 			for atom in d_PDB[conformation][resid]["liste_atomes"] :
-				cpt += 1
-				sumx += d_PDB[conf][resid][atom]["x"]
-				sumy += d_PDB[conf][resid][atom]["y"]
-				sumz += d_PDB[conf][resid][atom]["z"]
+				lcoord[0].append(d_PDB[conf][resid][atom]["x"])
+				lcoord[1].append(d_PDB[conf][resid][atom]["y"])
+				lcoord[2].append(d_PDB[conf][resid][atom]["z"])
 
-			d_PDB[conformation][resid]["CM_moyAll"]["x"] = sumx/cpt
-			d_PDB[conformation][resid]["CM_moyAll"]["y"] = sumy/cpt
-			d_PDB[conformation][resid]["CM_moyAll"]["z"] = sumz/cpt
+			xmoy = moyenne(lcoord[0])
+			ymoy = moyenne(lcoord[1])
+			zmoy = moyenne(lcoord[2])
 
-			d_prot[conf]["CM_res"]["x"].append(sumx/cpt)
-			d_prot[conf]["CM_res"]["y"].append(sumy/cpt)
-			d_prot[conf]["CM_res"]["z"].append(sumz/cpt)
+			d_PDB[conformation][resid]["CM_moyAll"]["x"] = xmoy
+			d_PDB[conformation][resid]["CM_moyAll"]["y"] = ymoy
+			d_PDB[conformation][resid]["CM_moyAll"]["z"] = zmoy
+
+			d_prot[conf]["CM_res"]["x"].append(xmoy)
+			d_prot[conf]["CM_res"]["y"].append(ymoy)
+			d_prot[conf]["CM_res"]["z"].append(zmoy)
 
 	return d_prot
 
@@ -285,7 +288,9 @@ def centreMasseResAll(d_prot) :
 	
 '''
 
-def RMSDresidus(d_ref, d_conf, centreMasse) :
+def RMSDresidus(d_ref, d_conf) :
+	
+	global centreMasse
 	
 	REF = d_ref["liste_conformations"][0] # il n'y a qu'une conformation : celle de reference
 	
@@ -305,17 +310,63 @@ def RMSDresidus(d_ref, d_conf, centreMasse) :
 	return d_conf
 	
 def RMSDconf(dico) :
+	'''
+	Calcul du RMSD de maniere globale a la conformation
+	Moyenne du RMSD des residus
+	'''
+	
 	dico["RMSDmoy"] = list()
+	dico["RMSDmoy_sd"] = list()
+	
 	for conf in d_conf["liste_conformations"] :
-		dico["RMSDmoy"].append(np.mean(d_conf[conf]["RMSD"]))
-	return dico["RMSDmoy"]
+		dico["RMSDmoy"].append(moyenne(d_conf[conf]["RMSD"]))
+		dico["RMSDmoy_sd"].append(ecart_type(d_conf[conf]["RMSD"]))
+	
+	return dico
+
+
+def RMSDres(dico1,dico2) :
+	'''
+	Calcul du RMSD de maniere locale
+	Moyenne du RMSD en chaque position a partir de l'ensemble des conformations
+	'''
+	
+	l_res = dico1[dico1["liste_conformations"][0]]["liste_n_residus"]
+
+	dico1["RMSDres_mean"] = list()
+	dico1["RMSDres_sd"] = list()
+
+	for i in range(len(l_res)) :
+		l_rmsd = list() # liste contenant les valeurs des RMSD d'un residu pour toutes ses conformations
+		for conf in dico2["liste_conformations"] :
+			l_rmsd.append(dico2[conf]["RMSD"][i])
+		
+		dico1["RMSDres_mean"].append(moyenne(l_rmsd))
+		dico1["RMSDres_sd"].append(ecart_type(l_rmsd))
+	return dico1["RMSDres_mean"]
+
+#-----------------------------------------------------------------------
+# Fonction de calcul statistique
+def moyenne(liste) :
+	return sum(liste)/len(liste)
+
+def variance(liste) :
+	n = len(liste)
+	m = moyenne(liste)**2
+	s = sum([x**2 for x in liste])
+	return s/n-m
+
+def ecart_type(liste) :
+	return sqrt(variance(liste))
+        
 
 #-----------------------------------------------------------------------
 # DISTANCE --> Calcul de la distance de chaque residu au centre de Masse
 # de la conformation  --> enfouissement des residus au sein de la conformation
 
-def distance(d_prot, centreMasse) :
+def distance(d_prot) :
 	
+	global centreMasse
 	# pour chaque conformation, son centre de masse :
 	xconf = d_prot["liste_CM_x"]
 	yconf = d_prot["liste_CM_y"]
@@ -334,9 +385,30 @@ def distance(d_prot, centreMasse) :
 			l_dist.append(distance)
 			
 			i += 1
+		
 		d_prot[conf]["enfouissement"] = l_dist
-
 	return d_prot
+
+
+
+def distanceRes(dico1, dico2) :
+	'''
+	Calcul de la distance moyenne de chaque residu a centre de masse de la proteine
+	'''
+
+	l_res = dico1[dico1["liste_conformations"][0]]["liste_n_residus"]
+
+	dico1["enfRes_mean"] = list()
+	dico1["enfRes_sd"] = list()
+
+	for i in range(len(l_res)) :
+		l_enf = list()
+		for conf in dico2["liste_conformations"] :
+			l_enf.append(dico2[conf]["enfouissement"][i])
+		
+		dico1["enfRes_mean"].append(moyenne(l_enf))
+		dico1["enfRes_sd"].append(ecart_type(l_enf))
+	return dico1["enfRes_mean"]
 
 #-----------------------------------------------------------------------
 # RAYON DE GIRATION --> distance maximale entre un residus et le centre de masse
@@ -354,15 +426,23 @@ def rayonGiration(d_prot) :
 
 def corEnfouissementFlexibilite(d_prot) :
 	'''
-		Fonction qui permet de visualiser la correlation entre l'enfouissement
-		des residus et la flexibilite des regions
-		La flexibilite augmente avec la distance des residus aux CdM
-		--> calcul de la correlation
+	Fonction qui permet de visualiser la correlation entre l'enfouissement
+	des residus et la flexibilite des regions
+	La flexibilite augmente avec la distance des residus aux CdM
+	--> calcul de la correlation
 	'''
 	d_prot["corEnfFlexi"] = list()
 	for conf in d_prot["liste_conformations"] :
 		d_prot["corEnfFlexi"].append(pearsonr(d_prot[conf]["enfouissement"],d_prot[conf]["RMSD"]))
 	return d_prot["corEnfFlexi"]
+
+
+
+
+
+
+
+
 
 def plotRMSD_Giration(listRMSD, listGiration):
 	y=np.array(listRMSD)
@@ -384,34 +464,85 @@ def plotRMSD_Giration(listRMSD, listGiration):
 
 def verificationfFichier(output) :
 	if (os.path.exists(output)) :
-		decision = raw_input("Fichier de sortie deja existant : Voulez vous l'ecraser ? O/N")
-		while (decision != "O" | decision != "o" | decision != "N"  | decision != "n") :
+		decision = raw_input("Fichier de sortie "+str(output)+" deja existant : Voulez vous l'ecraser ? O/N\n")
+		while ((decision != 'O') & (decision != 'o') & (decision != 'N')  & (decision != 'n')) :
 			print "Erreur : Repondre O pour oui ou N pour non" 
-			decision = raw_input("Fichier de sortie deja existant : Voulez vous l'ecraser ? O/N")
+			decision = raw_input("Fichier de sortie deja existant : Voulez vous l'ecraser ? O/N\n")
 		if ((decision == 'N') | (decision == 'n')) :
 			while os.path.exists(output) :
-				output = raw_input("Nom de fichier de sortie deja existant : entrez un nouveau nom de fichier : ")
+				output = raw_input("Nom de fichier de sortie deja existant : entrez un nouveau nom de fichier : \n")
 	return output
 
-def ecritureResultat(output) :
-	output = verificationfFichier(output)
+
+
+def outputGlobaux(output, dico1, dico2,x) :
 	try:
 		f = open(output, "w")
-		f.write()
-		f.close()
+		
+		texte = "Conformation\t|\tRayon Giration\t|\tRMSD\t(+/- ecart-type)\n"
+		#~ texte = "Conformation\t|\tRayon Giration\t|\tRMSD\t(+/- ecart-type)\tratio Giration\t ratio RMSD\n"
+		
+		
+		rayonG_ref = dico1["rayonGiration"][0]
+		rmsd_ref = dico1["RMSDmoy"][0]
+
+		texte += "\tREF\t\t\t|\t\t"+str(round(rayonG_ref,x))+"\t\t|\t"+str(round(rmsd_ref,x))+"\n"
+
+		for i in range(len(dico2["liste_conformations"])) :
+			num = dico2["liste_conformations"][i].strip()
+			rayonG = dico2["rayonGiration"][i]
+			rmsd = dico2["RMSDmoy"][i]
+			rmsd_sd = dico2["RMSDmoy_sd"][i]
+			
+			#~ ratio_rmsd = rmsd/rmsd_ref # a calculer dans fonction
+			#~ ratio_gir = rayonG/rayonG_ref
+
+			texte += "\t"+str(num)+"\t\t\t|\t\t"+str(round(rayonG,x))+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\n"
+			#~ texte += "\t"+str(num)+"\t\t\t|\t\t"+str(round(rayonG,x))+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+str(round(ratio_gir,x))+str(round(ratio_rmsd,x))+")\n"
+		f.write(texte)
+		f.close()		
 	except:
-		print("Erreur chargement fichier\n")
+		print("Erreur chargement fichier global\n")
 		sys.exit(0)
 
-def outputGlobaux() :
-	outfile = "res_barstar_globaux.txt"
-	ecritureResultat(outfile)
+def outputLocaux(output, dico1,x) :
+	
+	try:
+		
+		f = open(output, "w")
 
-def outputLocaux() :
-	outfile = "res_barstar_locaux.txt"
-	ecritureResultat(outfile)
+		texte = "Residus\t|\t Nom \t|\tRMSD (+/- ecart-type)\t|\tDistance residu/CdM\t(+/- ecart-type)\n"
+		
+		conf_ref = dico1["liste_conformations"][0]
+		lres = dico1[conf_ref]["liste_n_residus"]
 
+		for i in range(len(lres)) :
 
+			res = lres[i]
+
+			nom = dico1[dico1["liste_conformations"][0]]["liste_seq_residus"][i]
+			
+			rmsd = dico1["RMSDres_mean"][i]
+			rmsd_sd = dico1["RMSDres_sd"][i]
+			
+			d = dico1["enfRes_mean"][i]
+			d_sd = dico1["enfRes_sd"][i]
+			texte += "\t"+str(res)+"\t|\t"+nom+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t"+str(round(d,x))+"\t(+/-"+str(round(d_sd,x))+")\n"
+			
+		f.write(texte)
+		f.close()
+		
+	except:
+		print("Erreur chargement fichier local\n")
+		sys.exit(0)
+
+def ecriture(dico1, dico2) :
+	output1 = verificationfFichier("res_barstar_globaux.txt") # nom de fichier par defaut, mais on ne veut pas ecraser des resultats precedents
+	output2 = verificationfFichier("res_barstar_locaux.txt")
+	x = input("Indiquez le nombre de decimales souhaitees :\t")
+
+	outputGlobaux(output1, dico1, dico2,x)
+	outputLocaux(output2, dico1,x)
 #-----------------------------------------------------------------------
 # MAIN
 
@@ -440,34 +571,43 @@ if __name__ == '__main__':
 	# --> sinon exit avec erreur
 	
 	# Methode de calcul du centre de masse
-	meth = choixMeth(sys.argv[3]) # variable globale ??
+	centreMasse = choixMeth(sys.argv[3]) # variable globale ??
 	
 	# Centre Masse Residus
-	d_ref = centreMasseResidus(d_ref, meth)
-	d_conf = centreMasseResidus(d_conf, meth)
+	d_ref = centreMasseResidus(d_ref)
+	d_conf = centreMasseResidus(d_conf)
 	
 	# Centre Masse Proteine
-	d_ref = centreMasseProteine(d_ref, meth)
-	d_conf = centreMasseProteine(d_conf, meth)
+	d_ref = centreMasseProteine(d_ref)
+	d_conf = centreMasseProteine(d_conf)
 	
 	# RMSD
-	d_conf = RMSDresidus(d_ref, d_conf, meth)
+	d_conf = RMSDresidus(d_ref, d_conf)
 	
 	# distance
-	d_conf = distance(d_conf, meth)
-	d_ref = distance(d_ref, meth)
+	d_conf = distance(d_conf)
+	d_ref = distance(d_ref)
 
 	# rayon de Giration :
 	rayGiration = rayonGiration(d_conf)
 	rayGirationRef = rayonGiration(d_ref)
-	#~ print d_conf["rayonGiration"]
-	#~ rayGiration = [i/rayGirationRef[0] for i in rayGiration]
+	rayGiration = [i/rayGirationRef[0] for i in rayGiration]
 	#~ plt.plot(rayGiration)
 	
+	RMSDconf(d_ref)
+	
 	# pour chaque conformation --> calcul de la correlation entre
-	#~ correlation = corEnfouissementFlexibilite(d_conf)
-	#~ print correlation
+	correlation = corEnfouissementFlexibilite(d_conf)
 	#~ plt.plot(correlation)
-		
-	plt.plot(RMSDconf(d_conf))
+	
+	plt.plot(RMSDconf(d_ref))
+	#~ plt.plot(RMSDres(d_ref,d_conf))
 	plt.show()
+	
+	#~ RMSDconf(d_conf)
+	RMSDres(d_ref,d_conf)
+	distanceRes(d_ref, d_conf)
+	ecriture(d_ref, d_conf)
+
+		
+	
