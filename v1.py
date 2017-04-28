@@ -352,9 +352,12 @@ def moyenne(liste) :
 
 def variance(liste) :
 	n = len(liste)
-	m = moyenne(liste)**2
-	s = sum([x**2 for x in liste])
-	return s/n-m
+	if (n != 0) :
+		m = moyenne(liste)**2
+		s = sum([x**2 for x in liste])
+		return s/n-m
+	print "ERREUR : Dictionnaire sans conformation associee"
+	sys.exit(1)
 
 def ecart_type(liste) :
 	return sqrt(variance(liste))
@@ -387,6 +390,8 @@ def distance(d_prot) :
 			i += 1
 		
 		d_prot[conf]["enfouissement"] = l_dist
+		d_prot[conf]["distance_moy"] = moyenne(l_dist)
+		d_prot[conf]["distance_sd"] = ecart_type(l_dist)
 	return d_prot
 
 
@@ -431,17 +436,15 @@ def corEnfouissementFlexibilite(d_prot) :
 	La flexibilite augmente avec la distance des residus aux CdM
 	--> calcul de la correlation
 	'''
-	d_prot["corEnfFlexi"] = list()
+	d_prot["corEnfFlexi"] = [list(), list()] # correlation et pvaleur
 	for conf in d_prot["liste_conformations"] :
-		d_prot["corEnfFlexi"].append(pearsonr(d_prot[conf]["enfouissement"],d_prot[conf]["RMSD"]))
+		if(d_prot[conf]["RMSD"] == [0] * len(d_prot[conf]["RMSD"])) :
+			cor = [1,0]
+		else :
+			cor = pearsonr(d_prot[conf]["enfouissement"],d_prot[conf]["RMSD"])
+		d_prot["corEnfFlexi"][0].append(cor[0])
+		d_prot["corEnfFlexi"][1].append(cor[1])
 	return d_prot["corEnfFlexi"]
-
-
-
-
-
-
-
 
 
 def plotRMSD_Giration(listRMSD, listGiration):
@@ -482,23 +485,26 @@ def outputGlobaux(output, dico1, dico2,x) :
 		texte = "Conformation\t|\tRayon Giration\t|\tRMSD\t(+/- ecart-type)\n"
 		#~ texte = "Conformation\t|\tRayon Giration\t|\tRMSD\t(+/- ecart-type)\tratio Giration\t ratio RMSD\n"
 		
-		
 		rayonG_ref = dico1["rayonGiration"][0]
 		rmsd_ref = dico1["RMSDmoy"][0]
 
 		texte += "\tREF\t\t\t|\t\t"+str(round(rayonG_ref,x))+"\t\t|\t"+str(round(rmsd_ref,x))+"\n"
-
+		
 		for i in range(len(dico2["liste_conformations"])) :
+			
 			num = dico2["liste_conformations"][i].strip()
 			rayonG = dico2["rayonGiration"][i]
+
 			rmsd = dico2["RMSDmoy"][i]
+
 			rmsd_sd = dico2["RMSDmoy_sd"][i]
-			
+
 			#~ ratio_rmsd = rmsd/rmsd_ref # a calculer dans fonction
 			#~ ratio_gir = rayonG/rayonG_ref
 
 			texte += "\t"+str(num)+"\t\t\t|\t\t"+str(round(rayonG,x))+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\n"
 			#~ texte += "\t"+str(num)+"\t\t\t|\t\t"+str(round(rayonG,x))+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+str(round(ratio_gir,x))+str(round(ratio_rmsd,x))+")\n"
+
 		f.write(texte)
 		f.close()		
 	except:
@@ -527,6 +533,7 @@ def outputLocaux(output, dico1,x) :
 			
 			d = dico1["enfRes_mean"][i]
 			d_sd = dico1["enfRes_sd"][i]
+			#~ texte += "\t"+str(res)+"\t|\t"+nom+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+")\t"+str(round(d,x))+"\t(+/-"+")\n"
 			texte += "\t"+str(res)+"\t|\t"+nom+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t"+str(round(d,x))+"\t(+/-"+str(round(d_sd,x))+")\n"
 			
 		f.write(texte)
@@ -591,20 +598,22 @@ if __name__ == '__main__':
 	# rayon de Giration :
 	rayGiration = rayonGiration(d_conf)
 	rayGirationRef = rayonGiration(d_ref)
-	rayGiration = [i/rayGirationRef[0] for i in rayGiration]
 	#~ plt.plot(rayGiration)
 	
 	RMSDconf(d_ref)
 	
 	# pour chaque conformation --> calcul de la correlation entre
 	correlation = corEnfouissementFlexibilite(d_conf)
-	#~ plt.plot(correlation)
+	plt.plot(d_conf["corEnfFlexi"][0])
+	plt.show()
+	plt.plot(d_conf["corEnfFlexi"][1])
+	plt.show()
 	
-	plt.plot(RMSDconf(d_ref))
+	#~ plt.plot(RMSDconf(d_ref))
 	#~ plt.plot(RMSDres(d_ref,d_conf))
 	plt.show()
 	
-	#~ RMSDconf(d_conf)
+	RMSDconf(d_conf)
 	RMSDres(d_ref,d_conf)
 	distanceRes(d_ref, d_conf)
 	ecriture(d_ref, d_conf)
