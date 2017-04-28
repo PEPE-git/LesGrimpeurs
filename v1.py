@@ -288,6 +288,25 @@ def centreMasseResAll(d_prot) :
 	
 '''
 
+def RMSD(d_ref, d_conf) :
+	RMSDresidus(d_ref, d_conf)
+	
+	RMSDconf(d_ref)
+	RMSDconf(d_conf)
+	
+	RMSDres(d_ref, d_conf)
+	
+	RMSDratio(d_ref, d_conf)
+
+
+def RMSDratio(dico1, dico2) :
+	ref = dico1["RMSDres_mean"][0]
+	dico1["ratio_RMSD"] = [x/ref for x in dico2["RMSDres_mean"]]
+	return dico1["ratio_RMSD"]
+	
+	
+	
+	
 def RMSDresidus(d_ref, d_conf) :
 	
 	global centreMasse
@@ -323,6 +342,8 @@ def RMSDconf(dico) :
 		dico["RMSDmoy_sd"].append(ecart_type(d_conf[conf]["RMSD"]))
 	
 	return dico
+
+
 
 
 def RMSDres(dico1,dico2) :
@@ -375,6 +396,9 @@ def distance(d_prot) :
 	yconf = d_prot["liste_CM_y"]
 	zconf = d_prot["liste_CM_z"]
 	
+	d_prot["distance_moy"] = list()
+	d_prot["distance_sd"] = list()
+
 	for conf in d_prot["liste_conformations"] :
 		l_dist = []
 		
@@ -390,8 +414,8 @@ def distance(d_prot) :
 			i += 1
 		
 		d_prot[conf]["enfouissement"] = l_dist
-		d_prot[conf]["distance_moy"] = moyenne(l_dist)
-		d_prot[conf]["distance_sd"] = ecart_type(l_dist)
+		d_prot["distance_moy"].append(moyenne(l_dist))
+		d_prot["distance_sd"].append(ecart_type(l_dist))
 	return d_prot
 
 
@@ -419,12 +443,17 @@ def distanceRes(dico1, dico2) :
 # RAYON DE GIRATION --> distance maximale entre un residus et le centre de masse
 # d'une conformation <-> residus a l'enfouissement maximal
 
-def rayonGiration(d_prot) :
+def max_distance(d_prot) :
 	d_prot["rayonGiration"] = list()
 	for conf in d_prot["liste_conformations"] :
 		d_prot["rayonGiration"].append(max(d_prot[conf]["enfouissement"]))
 	return d_prot["rayonGiration"]
 
+def rayonGiration(d_prot1,d_prot2) :
+	rayon = max_distance(d_prot2)
+	ref = max_distance(d_prot1)[0]
+	d_prot2["ratio_giration"] = [x/ref for x in rayon]
+	return d_prot2["ratio_giration"]
 
 #-----------------------------------------------------------------------
 # REPRESENTATION DES DONNEES
@@ -595,28 +624,55 @@ if __name__ == '__main__':
 	d_conf = distance(d_conf)
 	d_ref = distance(d_ref)
 
-	# rayon de Giration :
-	rayGiration = rayonGiration(d_conf)
-	rayGirationRef = rayonGiration(d_ref)
-	#~ plt.plot(rayGiration)
+
+	#~ # AU NIVEAU GLOBAL
+	#~ #-----------------
 	
-	RMSDconf(d_ref)
+	#~ # rayon de Giration
+	#~ rayonGiration(d_ref, d_conf)
+	#~ plt.plot(d_conf["rayonGiration"])
+	#~ plt.show()
+	#~ plt.plot(d_conf["ratio_giration"])
+	#~ plt.show()
 	
-	# pour chaque conformation --> calcul de la correlation entre
-	correlation = corEnfouissementFlexibilite(d_conf)
-	plt.plot(d_conf["corEnfFlexi"][0])
+	#~ # Distance
+	#~ plt.plot(d_conf["distance_moy"])
+	#~ plt.show()
+	#~ plt.plot(d_conf["distance_sd"])
+	#~ plt.show()
+	
+	# RMSD
+	RMSD(d_ref, d_conf)
+	plt.plot(d_conf["RMSDmoy"])
 	plt.show()
-	plt.plot(d_conf["corEnfFlexi"][1])
+	plt.plot(d_conf["RMSDmoy_sd"])
 	plt.show()
+	plt.plot(d_conf["ratio_RMSD"])
+	plt.show()
+	
+	#~ # LIENS
+	#~ #------
+	#~ corEnfouissementFlexibilite(d_conf)
+	#~ plt.plot(d_conf["corEnfFlexi"][0])
+	#~ plt.show()
+	#~ plt.plot(d_conf["corEnfFlexi"][1])
+	#~ plt.show()
+	
+	
+	
+	
+	
+	
+	#~ plt.plot()
 	
 	#~ plt.plot(RMSDconf(d_ref))
-	#~ plt.plot(RMSDres(d_ref,d_conf))
-	plt.show()
+	#~ plt.show()
 	
-	RMSDconf(d_conf)
-	RMSDres(d_ref,d_conf)
-	distanceRes(d_ref, d_conf)
-	ecriture(d_ref, d_conf)
+	#~ plt.plot(RMSDres(d_ref,d_conf))
+	#~ plt.show()
+	
+	#~ distanceRes(d_ref, d_conf)
+	#~ ecriture(d_ref, d_conf)
 
 		
 	
