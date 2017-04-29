@@ -43,7 +43,12 @@ def __erreurMes() :
 	print "nom_atome :\t\tCA ou all (Methode de calcul du centre de masse)"
 	sys.exit(0)
 
-
+def conformation_analysis(l_dict) :
+	centreMasseCalc(l_dict)
+	RMSD(l_dict)
+	distance(l_dict)
+	rayonGiration(l_dict)
+	corEnfouissementFlexibilite(l_dict[1])
 
 #-----------------------------------------------------------------------
 def dictionnaire() :
@@ -235,6 +240,8 @@ def __centreMasseResidus(d_prot) :
 		- la position moyenne de ses atomes
 		- la position de ses carbones alpha
 	'''
+	global centreMasse
+	
 	if centreMasse == "CM_CA" :
 		return __centreMasseResCa(d_prot)
 	return __centreMasseResAll(d_prot)
@@ -646,128 +653,103 @@ def __outputLocaux(output, d_ref, x) :
 
 #~ def plotGiration_Temps(listGiration, listTemps):
 
+def plotRes(l_dict) :
+	plotGlobal(l_dict[1])
+	plotLocal(l_dict[0])
+
+def plotGlobal(d_conf) :
+	plotGiration(d_conf)
+	plotDistance(d_conf)
+	plotGlobalRMSD(d_conf)
+	corFlexibiteEnfouissement(d_conf)
+	
+def plotGiration(d_conf) :
+	plt.subplot(211)
+	plt.plot(d_conf["rayonGiration"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Rayon Giration')
+	
+	plt.subplot(212)
+	plt.plot(d_conf["ratio_giration"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Ratio Rayon Giration Conformation/Reference')
+	
+	plt.show()
+
+def plotDistance(d_conf) :
+	plt.subplot(311)
+	plt.plot(d_conf["distance_moy"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Distance moyenne')
+	
+	plt.subplot(312)
+	plt.plot(d_conf["distance_sd"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Ecart type')
+	
+	plt.subplot(313)
+	moy = d_conf["distance_moy"]
+	sd = d_conf["distance_sd"]
+	moy_s = [x+y for (x,y) in zip(moy,sd)]
+	moy_i = [x-y for (x,y) in zip(moy,sd)]
+
+	plt.plot(moy, "b", label = "Distance moyenne")
+	plt.plot(moy_s, "r", label = "+/- ecart-type")
+	plt.plot(moy_i, "r",)
+	plt.xlabel('Conformation')
+	plt.ylabel('Distance')
+	
+	plt.show()
+
+def plotGlobalRMSD(d_conf) :
+	plt.subplot(311)
+	plt.plot(d_conf["RMSDmoy"])
+	plt.xlabel('Conformation')
+	plt.ylabel('RMSD moyen')
+
+	plt.subplot(212)
+	plt.plot(d_conf["RMSDmoy_sd"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Ecart type')
+
+	plt.subplot(313)
+	moy = d_conf["RMSDmoy"]
+	sd = d_conf["RMSDmoy_sd"]
+	moy_s = [x+y for (x,y) in zip(moy,sd)]
+	moy_i = [x-y for (x,y) in zip(moy,sd)]
+	
+	plt.plot(moy, "b", label = "RMSD moyen")
+	plt.plot(moy_s, "r", label = "+/- ecart-type")
+	plt.plot(moy_i, "r",)
+	plt.xlabel('Conformation')
+	plt.ylabel('RMSD')
+
+	plt.show()
+	
+def corFlexibiteEnfouissement(d_conf) :
+	plt.subplot(211)
+	plt.plot(d_conf["corEnfFlexi"][0])
+	plt.xlabel('Conformation')
+	plt.ylabel('Correlation')
+	
+	plt.subplot(212)
+	plt.plot(d_conf["corEnfFlexi"][1])
+	plt.xlabel('Conformation')
+	plt.ylabel('p-valeur')
+	
+	plt.show()
+
 
 #-----------------------------------------------------------------------
 # MAIN
 
 if __name__ == '__main__':
 	
-	liste_dictionnaire = dictionnaire()
-	
+	liste_dictionnaire = dictionnaire()	# creation des dictionnaires
 	centreMasse = choixMeth()
+	conformation_analysis(liste_dictionnaire) # calcul des variables d'interet
+	ecriture(liste_dictionnaire) # ecriture dans un fichier
 	
-	centreMasseCalc(liste_dictionnaire)
-	RMSD(liste_dictionnaire)
-	distance(liste_dictionnaire)
-	rayonGiration(liste_dictionnaire)
-	corEnfouissementFlexibilite(liste_dictionnaire[1])
-	ecriture(liste_dictionnaire)
-	
-	
-	#~ RMSD(liste_dictionnaire)
-	
-	
-	#~ plotRMSD(liste_dictionnaire)
-	
+	plotRes(liste_dictionnaire) # graphiques
 
 
-	#~ usage(sys.argv)
-
-	
-	
-	#~ # Extraction de la conformation de reference
-	#~ d_ref = parsePDBMultiConf(sys.argv[1])
-	
-	#~ # Extraction des autres conformations
-	#~ d_conf = parsePDBMultiConf(sys.argv[2])
-	
-	
-
-	#~ # Il faut verifier que toutes les conformations ont le meme nombre de residus que 
-	#~ # la conformation de reference
-	#~ # stocke ce nombre de residus --> evitera d'avoir a mettre un compteur dans les 
-	#~ # fonction
-	
-	#~ # idem pour les residus : meme nombre d'atome
-	
-	#~ # pour cela comparaison des listes de residus et listes atomes !
-	
-	#~ # --> sinon exit avec erreur
-	
-	#~ # Methode de calcul du centre de masse
-	#~ centreMasse = choixMeth(sys.argv[3]) # variable globale ??
-	
-	#~ # Centre Masse Residus
-	#~ d_ref = centreMasseResidus(d_ref)
-	#~ d_conf = centreMasseResidus(d_conf)
-	
-	#~ # Centre Masse Proteine
-	#~ d_ref = centreMasseProteine(d_ref)
-	#~ d_conf = centreMasseProteine(d_conf)
-	
-	#~ # RMSD
-	#~ d_conf = RMSDresidus(d_ref, d_conf)
-	
-	#~ # distance
-	#~ d_conf = distance(d_conf)
-	#~ d_ref = distance(d_ref)
-
-
-	#~ # AU NIVEAU GLOBAL
-	#~ #-----------------
-	
-	#~ # rayon de Giration
-	#~ rayonGiration(d_ref, d_conf)
-	#~ plt.plot(d_conf["rayonGiration"])
-	#~ plt.show()
-	#~ plt.plot(d_conf["ratio_giration"])
-	#~ plt.show()
-	
-	#~ # Distance
-	#~ plt.plot(d_conf["distance_moy"])
-	#~ plt.show()
-	#~ plt.plot(d_conf["distance_sd"])
-	#~ plt.show()
-	
-	#~ # RMSD
-	#~ RMSD(d_ref, d_conf)
-	#~ plt.plot(d_conf["RMSDmoy"])
-	#~ plt.show()
-	#~ plt.plot(d_conf["RMSDmoy_sd"])
-	#~ plt.show()
-	#~ plt.plot(d_conf["ratio_RMSD"])
-	#~ plt.show()
-	
-	#~ # LIENS
-	#~ #------
-	#~ corEnfouissementFlexibilite(d_conf)
-	#~ plt.plot(d_conf["corEnfFlexi"][0])
-	#~ plt.show()
-	#~ plt.plot(d_conf["corEnfFlexi"][1])
-	#~ plt.show()
-	
-	
-	
-	
-	#~ # AU NIVEAU GLOBAL
-	#~ #-----------------
-	
-	#~ plt.plot()
-	
-	#~ plt.plot(RMSDconf(d_ref))
-	#~ plt.show()
-	
-	#~ plt.plot(RMSDres(d_ref,d_conf))
-	#~ plt.show()
-	
-	#~ distanceRes(d_ref, d_conf)
-
-	#~ # W OUTPUT
-	#~ #---------
-	#~ ecriture(d_ref, d_conf)
-
-		
-	
-	'''
-	Faire un try/except si variable globale centre de Masse est inconnue
-	'''
