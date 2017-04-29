@@ -290,26 +290,25 @@ def __centreMasseResAll(d_prot) :
 	# Pour toutes les conformations de la proteine
 	for conf in d_prot["liste_conformations"] :
 		# Pour tous les residus de chaque conformation de la proteine
-		for resid in d_PDB[conf]["liste_n_residus"] :
-			lcoord = list()
-			lcoord[0] = list() # stockage coordonnees x
-			lcoord[1] = list() # stockage coordonnees y
-			lcoord[2] = list() # stockage coordonnees z
-			# Pour tous les atomes de chaque residus
-
+		for resid in d_prot[conf]["liste_n_residus"] :
+			lcoord = [list(),list(),list()] # stockage coordonnees [x,y,z] pour tous les atomes de chaque residus
+			
+			
+			d_prot[conf]["CM_res"] = dict()
 			d_prot[conf]["CM_res"]["x"] = list()
 			d_prot[conf]["CM_res"]["y"] = list()
 			d_prot[conf]["CM_res"]["z"] = list()
 
-			for atom in d_PDB[conformation][resid]["liste_atomes"] :
-				lcoord[0].append(d_PDB[conf][resid][atom]["x"])
-				lcoord[1].append(d_PDB[conf][resid][atom]["y"])
-				lcoord[2].append(d_PDB[conf][resid][atom]["z"])
+			for atom in d_prot[conf][resid]["liste_atomes"] :
+				lcoord[0].append(d_prot[conf][resid][atom]["x"])
+				lcoord[1].append(d_prot[conf][resid][atom]["y"])
+				lcoord[2].append(d_prot[conf][resid][atom]["z"])
 
 			xmoy = moyenne(lcoord[0])
 			ymoy = moyenne(lcoord[1])
 			zmoy = moyenne(lcoord[2])
-
+			
+			d_prot[conf][resid]["CM_moyAll"] = dict()
 			d_prot[conf][resid]["CM_moyAll"]["x"] = xmoy
 			d_prot[conf][resid]["CM_moyAll"]["y"] = ymoy
 			d_prot[conf][resid]["CM_moyAll"]["z"] = zmoy
@@ -571,10 +570,10 @@ def __outputGlobaux(output, d_ref, d_conf, x) :
 	try:
 		f = open(output, "w")
 		
-		texte = "Conformation\t|\tRayon Giration\t|\tDistance_t|\tRMSD\t|\tRatio Giration\t|\tcorrelation\t(p-value)\n"
+		texte = "Conformation\t|\tRayon Giration\t|\tDistance\t|\tRMSD\t|\tRatio Giration\t|\tcorrelation\t(p-value)\n"
 
 		rayonG_ref = d_ref["rayonGiration"][0]
-		texte += "\tREF\t|\t"+str(round(rayonG_ref,x))+"\t|\t0\n"
+		texte += "REF\t|\t"+str(round(rayonG_ref,x))+"\t|\t0\n"
 		for i in range(len(d_conf["liste_conformations"])) :
 			num = d_conf["liste_conformations"][i].strip()
 			rayonG = d_conf["rayonGiration"][i]
@@ -585,7 +584,7 @@ def __outputGlobaux(output, d_ref, d_conf, x) :
 			ratio_gir = d_conf["ratio_giration"][i]
 			cor = d_conf["corEnfFlexi"][0][i]
 			pvalue = d_conf["corEnfFlexi"][1][i]
-			texte += "\t"+str(num)+"\t|\t"+str(round(rayonG,x))+"\t|\t"+str(round(d_moy,x))+"\t(+/-"+str(round(d_sd,x))+")\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t|\t"+str(round(ratio_gir,x))+"\t|\t"+str(round(cor,x))+"\t("+str(round(pvalue,x))+")\n"
+			texte += str(num)+"\t|\t"+str(round(rayonG,x))+"\t|\t"+str(round(d_moy,x))+"\t(+/-"+str(round(d_sd,x))+")\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t|\t"+str(round(ratio_gir,x))+"\t|\t"+str(round(cor,x))+"\t("+str(round(pvalue,x))+")\n"
 
 		f.write(texte)
 		f.close()		
@@ -599,7 +598,7 @@ def __outputLocaux(output, d_ref, x) :
 	try:
 		f = open(output, "w")
 		
-		texte = "Residus\t|\t Nom \t|\tRMSD (+/- ecart-type)\t|\tDistance residu/CdM\t(+/- ecart-type)\n"
+		texte = "Residus\t|\t Nom \t|\tRMSD (+/- ecart-type)\t|\tDistance residu/CdM (+/- ecart-type)\n"
 		conf_ref = d_ref["liste_conformations"][0]
 		lres = d_ref[conf_ref]["liste_n_residus"]
 		
@@ -611,7 +610,7 @@ def __outputLocaux(output, d_ref, x) :
 			d = d_ref["enfRes_mean"][i]
 			d_sd = d_ref["enfRes_sd"][i]
 			
-			texte += "\t"+str(res)+"\t|\t"+nom+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t"+str(round(d,x))+"\t(+/-"+str(round(d_sd,x))+")\n"
+			texte += str(res)+"\t|\t"+nom+"\t|\t"+str(round(rmsd,x))+"\t(+/-"+str(round(rmsd_sd,x))+")\t|\t"+str(round(d,x))+"\t(+/-"+str(round(d_sd,x))+")\n"
 			
 		f.write(texte)
 		f.close()
@@ -619,8 +618,6 @@ def __outputLocaux(output, d_ref, x) :
 	except:
 		print("Erreur chargement fichier local\n")
 		sys.exit(0)
-
-
 
 #-----------------------------------------------------------------------
 # GRAPHIQUES
@@ -661,7 +658,7 @@ def plotGlobal(d_conf) :
 	plotGiration(d_conf)
 	plotDistance(d_conf)
 	plotGlobalRMSD(d_conf)
-	corFlexibiteEnfouissement(d_conf)
+	plotFlexibiteEnfouissement(d_conf)
 	
 def plotGiration(d_conf) :
 	plt.subplot(211)
@@ -694,8 +691,8 @@ def plotDistance(d_conf) :
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
 
 	plt.plot(moy, "b", label = "Distance moyenne")
-	plt.plot(moy_s, "r", label = "+/- ecart-type")
-	plt.plot(moy_i, "r",)
+	plt.plot(moy_s, "r--", label = "+/- ecart-type")
+	plt.plot(moy_i, "r--",)
 	plt.xlabel('Conformation')
 	plt.ylabel('Distance')
 	
@@ -719,14 +716,14 @@ def plotGlobalRMSD(d_conf) :
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
 	
 	plt.plot(moy, "b", label = "RMSD moyen")
-	plt.plot(moy_s, "r", label = "+/- ecart-type")
-	plt.plot(moy_i, "r",)
+	plt.plot(moy_s, "r--", label = "+/- ecart-type")
+	plt.plot(moy_i, "r--",)
 	plt.xlabel('Conformation')
 	plt.ylabel('RMSD')
 
 	plt.show()
 	
-def corFlexibiteEnfouissement(d_conf) :
+def plotFlexibiteEnfouissement(d_conf) :
 	plt.subplot(211)
 	plt.plot(d_conf["corEnfFlexi"][0])
 	plt.xlabel('Conformation')
@@ -738,6 +735,60 @@ def corFlexibiteEnfouissement(d_conf) :
 	plt.ylabel('p-valeur')
 	
 	plt.show()
+
+#-----------------------------------------------------------------------
+def plotLocal(d_ref) :
+	plotDistanceLocal(d_ref)
+	plotRMSDLocal(d_ref)
+
+def plotDistanceLocal(d_ref) :
+	plt.subplot(311)
+	plt.plot(d_ref["enfRes_mean"])
+	plt.xlabel('Conformation')
+	plt.ylabel('Distance')
+	
+	plt.subplot(312)
+	plt.plot(d_ref["enfRes_sd"])
+	plt.xlabel('Conformation')
+	plt.ylabel('ecart type')
+	
+	plt.subplot(3,1,3)
+	moy = d_ref["enfRes_mean"]
+	sd = d_ref["enfRes_sd"]
+	moy_s = [x+y for (x,y) in zip(moy,sd)]
+	moy_i = [x-y for (x,y) in zip(moy,sd)]
+
+	plt.plot(moy, "b", label = "Distance moyenne")
+	plt.plot(moy_s, "r--", label = "+/- ecart-type")
+	plt.plot(moy_i, "r--",)
+	plt.xlabel('Conformation')
+	plt.ylabel('Distance')
+	plt.show()
+
+
+
+def plotRMSDLocal(d_ref) :
+	plt.subplot(311)
+	plt.plot(d_ref["RMSDres_mean"])
+	plt.xlabel('Conformation')
+	plt.ylabel('RMSD')
+	
+	plt.subplot(312)
+	plt.plot(d_ref["RMSDres_sd"])
+	plt.xlabel('Conformation')
+	plt.ylabel('ecart type')
+
+	plt.subplot(313)
+	moy = d_ref["RMSDres_mean"]
+	sd = d_ref["RMSDres_sd"]
+	moy_s = [x+y for (x,y) in zip(moy,sd)]
+	moy_i = [x-y for (x,y) in zip(moy,sd)]
+	
+	plt.plot(moy, "b", label = "RMSD moyen")
+	plt.plot(moy_s, "r--", label = "+/- ecart-type")
+	plt.plot(moy_i, "r--",)
+	plt.xlabel('Conformation')
+	plt.ylabel('RMSD')
 
 
 #-----------------------------------------------------------------------
