@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python2
 
 # usage : python v1.py start_prot_only.pdb md_prot_only_skip100.pdb CA
 
@@ -289,6 +289,10 @@ def centreMasseResAll(d_prot) :
 '''
 
 def RMSD(d_ref, d_conf) :
+	'''
+	Fonction permettant de calculer l'ensemble des calculs relatifs au RMSD
+	C'est la seule qui peut etre utilisee par l'utilisateur
+	'''
 	RMSDresidus(d_ref, d_conf)
 	
 	RMSDconf(d_ref)
@@ -298,11 +302,10 @@ def RMSD(d_ref, d_conf) :
 	
 	RMSDratio(d_ref, d_conf)
 
-
 def RMSDratio(dico1, dico2) :
 	ref = dico1["RMSDres_mean"][0]
-	dico1["ratio_RMSD"] = [x/ref for x in dico2["RMSDres_mean"]]
-	return dico1["ratio_RMSD"]
+	dico2["ratio_RMSD"] = [x/ref for x in dico1["RMSDres_mean"]]
+	return dico2["ratio_RMSD"]
 	
 	
 	
@@ -641,14 +644,14 @@ if __name__ == '__main__':
 	#~ plt.plot(d_conf["distance_sd"])
 	#~ plt.show()
 	
-	# RMSD
-	RMSD(d_ref, d_conf)
-	plt.plot(d_conf["RMSDmoy"])
-	plt.show()
-	plt.plot(d_conf["RMSDmoy_sd"])
-	plt.show()
-	plt.plot(d_conf["ratio_RMSD"])
-	plt.show()
+	#~ # RMSD
+	#~ RMSD(d_ref, d_conf)
+	#~ plt.plot(d_conf["RMSDmoy"])
+	#~ plt.show()
+	#~ plt.plot(d_conf["RMSDmoy_sd"])
+	#~ plt.show()
+	#~ plt.plot(d_conf["ratio_RMSD"])
+	#~ plt.show()
 	
 	#~ # LIENS
 	#~ #------
