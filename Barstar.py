@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-# usage : python2 v1.py start_prot_only.pdb md_prot_only_skip100.pdb CA
+# usage : python2 Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb CA
 
 import sys, os
 from math import sqrt
@@ -510,10 +510,10 @@ def ecart_type(liste) :
 
 def corEnfouissementFlexibilite_conf(d_conf) :
 	'''
-	Fonction qui permet de visualiser la correlation entre l'enfouissement
-	des residus et la flexibilite des regions.
-	La flexibilite augmente avec la distance des residus aux CdM.
-	--> calcul de la correlation
+	Calcul de la correlation entre l'enfouissement des residus et la flexibilite des regions pour chaque conformation.
+	L'enfouissement est inversement proportionnel a la distance des residus aux CdM.
+	La flexibilite augmente avec le RMSD entre le residu et sa position dans la reference.
+
 	'''
 	d_conf["corEnfFlexi_conf"] = [list(), list()] # correlation et pvaleur
 	for conf in d_conf["liste_conformations"] :
@@ -525,6 +525,15 @@ def corEnfouissementFlexibilite_conf(d_conf) :
 		d_conf["corEnfFlexi_conf"][1].append(cor[1])
 	return d_conf["corEnfFlexi_conf"]
 
+
+# def corEnfouissementFlexibilite_ref(d_ref) :
+# 	Calcul de la correlation entre l'enfouissement des residus et leur flexibilite en fonction du residu.
+# 	d_ref["corEnfFlexi_ref"] = [list(), list()] # correlation et pvaleur
+# 	for i in range(len(d_ref["enfRes_mean"])) :
+# 		cor = pearsonr(d_ref["enfRes_mean"][i],d_ref["RMSDres_mean"][i])
+# 		d_ref["corEnfFlexi_ref"][0].append(cor[0])
+# 		d_ref["corEnfFlexi_ref"][1].append(cor[1])
+# 	return d_ref["corEnfFlexi_ref"]
 
 #-----------------------------------------------------------------------
 # PARTIE 6 : ECRITURE DES RESULTATS
@@ -544,6 +553,7 @@ def ecriture(l_dict,methode) :
 
 def __verificationfFichier(output) :
 	#Si le fichier existe deja, demande si l'utilisateur veut le remplacer ou non
+
 	if (os.path.exists(output)) :
 		decision = raw_input("Fichier de sortie "+str(output)+" deja existant : Voulez vous l'ecraser ? O/N\n")
 	
@@ -615,6 +625,7 @@ def __outputLocaux(output, d_ref, x) :
 		print("Erreur chargement fichier"+output+"\n")
 		sys.exit(0)
 
+
 #-----------------------------------------------------------------------
 # GRAPHIQUES
 #-----------------------------------------------------------------------
@@ -633,12 +644,12 @@ def plotGiration(d_conf) :
 	# plt.subplot(211)
 	plt.title('Rayon de Giration en fonction des conformations')
 	plt.plot(d_conf["rayonGiration"])
+	plt.axhline(y=d_conf["rayonGiration"][0],ls='--',color='black')
+	# plt.plot(d_conf["rayonGiration"][0], color="black")
 	plt.xlabel('Conformations')
 	plt.ylabel('Rayon de Giration')
 
-	plt.text(0,18.3,"Les ratios (rayons de Giration des conformations/rayon de Giration de la reference)\nsont compris dans [%s,%s]"%(str(round(min(d_conf["ratio_giration"]),3)),str(round(max(d_conf["ratio_giration"]),3))),
-		fontsize=10,color="b")
-	
+
 	# plt.subplot(212)
 	# plt.title('Ratio du Rayon de Giration des conformations\n sur celui de la reference en fonction des conformations')
 	# plt.plot(d_conf["ratio_giration"])
@@ -722,6 +733,7 @@ def plotFlexibiteEnfouissement(d_conf) :
 def plotLocal(d_ref) :
 	plotDistanceLocal(d_ref)
 	plotRMSDLocal(d_ref)
+	corEnfouissementFlexibilite_ref(d_ref)
 
 def plotDistanceLocal(d_ref) :
 	# plt.subplot(311)
@@ -774,6 +786,22 @@ def plotRMSDLocal(d_ref) :
 	plt.ylabel('RMSD')
 	plt.title('RMSD moyen (+/- ecart-type), par rapport a la reference, de la position \ndes residus pour chaque conformation, en fonction du residu')
 	plt.show()
+
+# def plotFlexibiteEnfouissement_residus(d_ref) :
+# 	plt.subplot(211)
+# 	plt.plot(d_ref["corEnfFlexi_ref"][0])
+# 	plt.title('Correlation de la Flexibilite moyenne des residus\n et leur Enfouissement moyen, en fonction des residus')
+# 	plt.xlabel('Residus')
+# 	plt.ylabel('Correlation')
+	
+# 	plt.subplot(212)
+# 	plt.plot(d_ref["corEnfFlexi_ref"][1])
+# 	plt.title('p-value de la Correlation Flexibilite/Enfouissement moyens \n en fonction des residus')
+# 	plt.xlabel('Residus')
+# 	plt.ylabel('p-valeur')
+	
+# 	plt.tight_layout()
+# 	plt.show()
 
 #-----------------------------------------------------------------------
 # MAIN
