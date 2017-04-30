@@ -13,25 +13,26 @@ En particulier, on s'intéresse aux changements conformationnels globaux (compac
  ------------
 
 Utilisez Barstar.py pour obtenir toutes les informations pertinentes quant aux changements conformationnels de votre protéine d'intérêt par rapport à sa référence.
-code :: python
-	#Parsing des fichiers .pdb en arguments sous forme de dictionnaire
-	barstar_conf= __parsePDBM(barstar_conf.pdb)
-	barstar_ref = __parsePDBM(barstar_ref.pdb)
 
-	#Calcul des changements conformationnels vis-à-vis de la référence et ajout de ces valeurs dans le dictionnaire avec des clés pertinentes.
-	l_dict=[barstar_conf, barstar_ref]
+```python
+#Parsing des fichiers .pdb en arguments sous forme de dictionnaire
+barstar_conf= __parsePDBM(barstar_conf.pdb)
+barstar_ref = __parsePDBM(barstar_ref.pdb)
 
-	#Calcul du centre de masse des résidus et de chaque conformation
-	centreMasseCalc(l_dict)	
-	#Calcul du RMSD des residus de chaque conformation par rapport à la référence			
-	RMSD(l_dict)			
-	#Calcul de la distance entre les résidus et le CdM pour chaque conformation			
-	distance(l_dict)	
-	#Calcul du Rayon de Giration pour chaque conformation				
-	rayonGiration(l_dict)				
-	#Calcul de la corrélation entre le Rayon de Giration (Enfouissement) et la Flexibilité (RMSD) pour chaque conformation
-	corEnfouissementFlexibilite_conf(l_dict)		
+#Calcul des changements conformationnels vis-à-vis de la référence et ajout de ces valeurs dans le dictionnaire avec des clés pertinentes.
+l_dict=[barstar_conf, barstar_ref]
 
+#Calcul du centre de masse des résidus et de chaque conformation
+centreMasseCalc(l_dict)	
+#Calcul du RMSD des residus de chaque conformation par rapport à la référence			
+RMSD(l_dict)			
+#Calcul de la distance entre les résidus et le CdM pour chaque conformation			
+distance(l_dict)	
+#Calcul du Rayon de Giration pour chaque conformation				
+rayonGiration(l_dict)				
+#Calcul de la corrélation entre le Rayon de Giration (Enfouissement) et la Flexibilité (RMSD) pour chaque conformation
+corEnfouissementFlexibilite_conf(l_dict)		
+```
 
  API
  ---
