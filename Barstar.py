@@ -1,6 +1,12 @@
 #!/usr/bin/env python2
 
-# usage : python2 Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb CA
+"""
+Author: LesGrimpeurs
+Date: 02/05/2017
+Description: Projet Barstar
+"""
+
+# usage : python2 Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb all
 
 import sys, os
 from math import sqrt
@@ -9,26 +15,6 @@ from scipy.stats.stats import pearsonr
 import numpy as np
 import csv
 
-#PLAN
-	#Changements conformationnels globaux
-
-		#Calcul rayon de Giration (distance entre CdM et residu le plus eloigne du CdM)
-		#et RMSD de toutes les conformations par rapport a la ref
-
-		#Representation de la variation Giration/RMSD, Giration/Temps, RMSD/Temps.
-
-	#Changements conformationnels locaux
-	
-		#RMSD de chaque residu de chaque conformation par rapport a sa position dans la ref
-			#Region flexible = region dont residus ont un grand RMSD
-
-		#Enfouissement : Calcul distance entre CdM de chaque residu et CdM du centre de la prot
-
-		#Comparer enfouissement des residus et RMSD des residus
-			#Regions flexibles enfouies ou en surface ?
-
-		#Calcul RMSD et Enfouissement moyen pour chaque residu de chaque conformation vs reference
-			#Representation Graphique
 
 #-----------------------------------------------------------------------
 def	__usage(arguments) :
@@ -545,15 +531,19 @@ def corEnfouissementFlexibilite_res(d_ref) :
 #-----------------------------------------------------------------------
 
 def ecriture(l_dict,methode) :
+	if not os.path.exists('Barstar_Results_'+methode+'/'):
+		os.makedirs('Barstar_Results_'+methode)
+	else :	
+		output1 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_globaux_"+methode+".csv") # nom de fichier par defaut, mais on ne veut pas ecraser des resultats precedents
+		output2 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_locaux_"+methode+".csv")
+	print "Ecriture dans le dossier Barstar_Results_"+methode+"/ les fichiers de sortie 'res_barstar_globaux_"+methode+".csv' et 'res_barstar_locaux_"+methode+".csv'"
+	x = raw_input("Indiquez le nombre de decimales souhaitees :\t")
+	while not x.isdigit() :
+		print "Indiquez un chiffre svp"
+		x = raw_input("Indiquez le nombre de decimales souhaitees :\t")
 
-	print "Ecriture des resultats dans les fichiers de sortie 'res_barstar_globaux_"+methode+".csv' et 'res_barstar_locaux_"+methode+".csv'"
-	output1 = __verificationfFichier("res_barstar_globaux_"+methode+".csv") # nom de fichier par defaut, mais on ne veut pas ecraser des resultats precedents
-	output2 = __verificationfFichier("res_barstar_locaux_"+methode+".csv")
-	
-	x = input("Indiquez le nombre de decimales souhaitees :\t")
-	__outputGlobaux(output1, l_dict[0], l_dict[1], x)
-	__outputLocaux(output2, l_dict[0], x)
-
+	__outputGlobaux(output1, l_dict[0], l_dict[1], int(x))
+	__outputLocaux(output2, l_dict[0], int(x))
 
 
 def __verificationfFichier(output) :
@@ -565,10 +555,13 @@ def __verificationfFichier(output) :
 		while ((decision != 'O') & (decision != 'o') & (decision != 'N')  & (decision != 'n')) :
 			print "Erreur : Repondre O pour oui ou N pour non" 
 			decision = raw_input("Fichier de sortie deja existant : Voulez vous l'ecraser ? O/N\n")
-	
+		
 		if ((decision == 'N') | (decision == 'n')) :
 			while os.path.exists(output) :
 				output = raw_input("Nom de fichier de sortie deja existant : entrez un nouveau nom de fichier : \n")
+		elif ((decision == 'O') | (decision == 'o')) :
+			rm = 'rm '+output
+			os.popen(rm)	
 	return output
 
 
@@ -636,6 +629,10 @@ def __outputLocaux(output, d_ref, x) :
 #-----------------------------------------------------------------------
 
 def plotRes(l_dict) :
+	'''
+	Affiche et enregistre dans le fichier correspondant les plot de l'anayle globale, puis ceux de l'analyse locale
+	'''
+
 	plotGlobal(l_dict[1])
 	plotLocal(l_dict[0]) 
 
@@ -646,6 +643,7 @@ def plotGlobal(d_conf) :
 	plotFlexibiteEnfouissement(d_conf)
 	
 def plotGiration(d_conf) :
+
 	# plt.subplot(211)
 	plt.title('Rayon de Giration en fonction des conformations')
 	plt.plot(d_conf["rayonGiration"])
@@ -662,6 +660,8 @@ def plotGiration(d_conf) :
 	# plt.ylabel('Ratio Rayon Giration\n Conformation/Reference')
 
 	# plt.tight_layout()
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/Giration_conf.png")
 	plt.show()
 
 def plotDistance(d_conf) :
@@ -688,6 +688,8 @@ def plotDistance(d_conf) :
 	plt.xlabel('Conformations')
 	plt.ylabel('Distance moyenne')
 	
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/Distance_conf.png")
 	plt.show()
 
 def plotGlobalRMSD(d_conf) :
@@ -714,6 +716,8 @@ def plotGlobalRMSD(d_conf) :
 	plt.xlabel('Conformations')
 	plt.ylabel('RMSD moyen')
 
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/RMSD_conf.png")
 	plt.show()
 	
 
@@ -732,6 +736,9 @@ def plotFlexibiteEnfouissement(d_conf) :
 	plt.ylabel('p-valeur')
 	
 	plt.tight_layout()
+
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/Correlation_conf.png")
 	plt.show()
 
 #-----------------------------------------------------------------------
@@ -765,6 +772,9 @@ def plotDistanceLocal(d_ref) :
 	plt.xlabel('Residus')
 	plt.ylabel('Distance')
 	plt.title('Distance moyenne (+/- ecart-type) des residus par rapport au CdM \npour chaque conformation, en fonction du residu')
+
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/Distance_residu.png")
 	plt.show()
 
 
@@ -792,6 +802,9 @@ def plotRMSDLocal(d_ref) :
 	plt.xlabel('Residus')
 	plt.ylabel('RMSD')
 	plt.title('RMSD moyen (+/- ecart-type), par rapport a la reference, de la position \ndes residus pour chaque conformation, en fonction du residu')
+
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/RMSD_residu.png")
 	plt.show()
 
 
@@ -810,6 +823,9 @@ def plotFlexibiteEnfouissement_residus(d_ref) :
 	plt.ylabel('p-valeur')
 	
 	plt.tight_layout()
+
+	global type_analyse
+	plt.savefig("Barstar_Results_"+type_analyse+"/Correlation_residu.png")
 	plt.show()
 
 #-----------------------------------------------------------------------
@@ -818,8 +834,10 @@ def plotFlexibiteEnfouissement_residus(d_ref) :
 if __name__ == '__main__':
 	liste_dictionnaire = dictionnaire()					# Creation d'une liste : [dictionnaire_des_conformations,dictionnaire_de_la_reference]
 	centreMasse = choixMeth()							# "CM_CA" ou "CM_moyall" en fonction de la methode de calcul choisie
-	conformation_analysis(liste_dictionnaire) 			# calcul des variables d'interet et ajout dans les dictionnaires 
-	ecriture(liste_dictionnaire,centreMasse) 			# ecriture des resultats dans les tableaux excel de sortie, en fonction de la methode de calcul des CdM
-	plotRes(liste_dictionnaire) 						# representations graphiques
+	conformation_analysis(liste_dictionnaire)			# calcul des variables d'interet et ajout dans les dictionnaires
 
-	print ""
+	global type_analyse
+	type_analyse=centreMasse+"_"+str(len(liste_dictionnaire[1]["liste_conformations"])-1)	
+			 
+	ecriture(liste_dictionnaire,type_analyse)			# ecriture des resultats dans les tableaux excel de sortie, en fonction de la methode de calcul des CdM
+	plotRes(liste_dictionnaire) 						# representations graphiques
