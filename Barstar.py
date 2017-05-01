@@ -531,7 +531,7 @@ def corEnfouissementFlexibilite_conf(d_conf) :
 
 
 def corEnfouissementFlexibilite_res(d_ref) :
-	#Calcul de la correlation entre l'enfouissement des residus et leur flexibilite en fonction du residu.
+	#Calcul, pour chaque residu de chaque conformation, de la correlation entre l'enfouissement du residu et sa flexibilite.
 	d_ref["corEnfFlexi_ref"] = [list(), list()] # correlation et pvaleur
 	for i in range(len(d_ref["list_enfRes"])) :
 		cor = pearsonr(d_ref["list_enfRes"][i],d_ref["list_RMSDres"][i])
