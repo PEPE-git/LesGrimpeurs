@@ -6,7 +6,7 @@ Date: 02/05/2017
 Description: Projet Barstar
 """
 
-# usage : python2 Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb all
+# usage : python2 main_Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb all
 
 import sys, os
 from math import sqrt
@@ -22,6 +22,7 @@ import Graphes as graph
 
 #-----------------------------------------------------------------------
 # MAIN
+#-----------------------------------------------------------------------
 
 if __name__ == '__main__':
 	'''
@@ -30,17 +31,28 @@ if __name__ == '__main__':
 	'''
 	liste_dictionnaire = parse.dictionnaire()
 
+
 	'''
-	centre de masse des residus calcule a partir de la position du carbone alpha "CM_CA" ou de la distance moyenne separant les atomes "CM_moyall"
+	Centre de Masse des residus calcule a partir de la position du carbone alpha "CM_CA" ou de la distance moyenne separant les atomes "CM_moyall"
 	'''			
 	centreMasse = conf_anal.choixMeth()			
-	conf_anal.conformation_analysis(liste_dictionnaire)			# calcul des variables d'interet et ajout dans les dictionnaires
 
-	#string globale servant a donner le bon nom au dossier et fichiers en fonction du nombre de conformations analysees et de la methode pour le calcul du centre de masse
+
+	'''
+	Calcul des valeurs des variables d'interet (CdM, Distance au CdM, RMSD, Correlation...) et ajout dans les dictionnaires a des cles pertinentes
+	'''
+	conf_anal.conformation_analysis(liste_dictionnaire)	
+
+
+
+	#string globale servant a donner le bon nom aux dossiers et fichiers en fonction du nombre de conformations analysees et de la methode pour le calcul du centre de masse
 	global type_analyse
 	type_analyse=centreMasse+"_"+str(len(liste_dictionnaire[1]["liste_conformations"])-1)	
 
-	write.ecriture(liste_dictionnaire,type_analyse)			# ecriture des resultats dans les tableaux excel de sortie, en fonction de la methode de calcul des CdM
+	'''
+	Ecriture des resultats dans les tableaux excel de sortie, en fonction de la methode de calcul des CdM
+	'''
+	write.ecriture(liste_dictionnaire,type_analyse)			
 	graph.plotRes(liste_dictionnaire) 						# representations graphiques et enregistrement des images
 
 
