@@ -141,12 +141,27 @@ def plotDistanceLocal(d_ref) :
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
 
+
+	# plt.subplot(311)
+ # 	plt.plot(d_ref["enfRes_mean"])
+ # 	plt.xlabel('Conformation')
+ # 	plt.ylabel('Distance')
+ 	
+ 	plt.subplot(211)
+ 	plt.plot(d_ref["enfRes_sd"])
+ 	plt.xlabel('Conformation')
+ 	plt.ylabel('ecart type')
+ 	plt.title('Ecart-Type de la Distance moyenne des residus \npar rapport au CdM pour chaque conformation, en fonction du residu')
+ 	
+ 	plt.subplot(212)
 	plt.plot(moy, "b", label = "Distance moyenne")
 	plt.plot(moy_s, "r--", label = "+/- ecart-type")
 	plt.plot(moy_i, "r--",)
 	plt.xlabel('Residus')
 	plt.ylabel('Distance')
 	plt.title('Distance moyenne (+/- ecart-type) des residus par rapport au CdM \npour chaque conformation, en fonction du residu')
+
+	plt.tight_layout()
 
 	global type_analyse
 	plt.savefig("Barstar_Results_"+type_analyse+"/Distance_residu.png")
@@ -163,12 +178,28 @@ def plotRMSDLocal(d_ref) :
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
 	
+
+	# plt.subplot(311)
+ # 	plt.plot(d_ref["RMSDres_mean"])
+ # 	plt.xlabel('Conformation')
+ # 	plt.ylabel('RMSD')
+ 	
+ 	plt.subplot(211)
+ 	plt.plot(d_ref["RMSDres_sd"])
+ 	plt.xlabel('Conformation')
+ 	plt.ylabel('ecart type')
+ 	plt.title('Ecart-Type du RMSD moyen, par rapport a la reference, \nde la position des residus pour chaque conformation, en fonction du residu')
+
+ 
+ 	plt.subplot(212)
 	plt.plot(moy, "b", label = "RMSD moyen")
 	plt.plot(moy_s, "r--", label = "+/- ecart-type")
 	plt.plot(moy_i, "r--",)
 	plt.xlabel('Residus')
 	plt.ylabel('RMSD')
 	plt.title('RMSD moyen (+/- ecart-type), par rapport a la reference, de la position \ndes residus pour chaque conformation, en fonction du residu')
+
+	plt.tight_layout()
 
 	global type_analyse
 	plt.savefig("Barstar_Results_"+type_analyse+"/RMSD_residu.png")

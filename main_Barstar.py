@@ -49,13 +49,20 @@ if __name__ == '__main__':
 	global type_analyse
 	type_analyse=centreMasse+"_"+str(len(liste_dictionnaire[1]["liste_conformations"])-1)	
 
+
 	'''
-	Ecriture des resultats dans les tableaux excel de sortie, en fonction de la methode de calcul des CdM
+	Ecriture des resultats dans les tableaux excel de sortie, dans les fichiers correspondants, en fonction de la methode de calcul des CdM
 	'''
 	write.ecriture(liste_dictionnaire,type_analyse)			
-	graph.plotRes(liste_dictionnaire) 						# representations graphiques et enregistrement des images
 
 
+	'''
+	Representations graphiques des resultats et enregistrement des images
+	'''
+	graph.plotRes(liste_dictionnaire) 						
+
+
+	#Suppression des fichiers .pyc une fois le programme execute.
 	cwd = os.getcwd()
 	for file in os.listdir(cwd):
 		if file.endswith('.pyc'):
