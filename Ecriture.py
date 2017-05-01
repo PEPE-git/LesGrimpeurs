@@ -24,9 +24,9 @@ def ecriture(l_dict,methode) :
 
 	if not os.path.exists('Barstar_Results_'+methode+'/'):
 		os.makedirs('Barstar_Results_'+methode)
-	else :	
-		output1 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_globaux_"+methode+".csv") # nom de fichier par defaut, mais on ne veut pas ecraser des resultats precedents
-		output2 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_locaux_"+methode+".csv")
+		
+	output1 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_globaux_"+methode+".csv") # nom de fichier par defaut, mais on ne veut pas ecraser des resultats precedents
+	output2 = __verificationfFichier("Barstar_Results_"+methode+"/res_barstar_locaux_"+methode+".csv")
 	print "Ecriture dans le dossier Barstar_Results_"+methode+"/ les fichiers de sortie 'res_barstar_globaux_"+methode+".csv' et 'res_barstar_locaux_"+methode+".csv'"
 	x = raw_input("\nIndiquez le nombre de decimales souhaitees :\t")
 	while not x.isdigit() :
