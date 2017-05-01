@@ -24,9 +24,16 @@ import Graphes as graph
 # MAIN
 
 if __name__ == '__main__':
-	
-	liste_dictionnaire = parse.dictionnaire()					# Creation d'une liste : [dictionnaire_des_conformations,dictionnaire_de_la_reference]
-	centreMasse = conf_anal.choixMeth()							# "CM_CA" ou "CM_moyall" en fonction de la methode de calcul choisie
+	'''
+	Creation d'une liste : [dictionnaire_des_conformations,dictionnaire_de_la_reference]
+	Chaque dictionnaire possede la position de chaque atome de chaque residu de chaque conformation.
+	'''
+	liste_dictionnaire = parse.dictionnaire()
+
+	'''
+	centre de masse des residus calcule a partir de la position du carbone alpha "CM_CA" ou de la distance moyenne separant les atomes "CM_moyall"
+	'''			
+	centreMasse = conf_anal.choixMeth()			
 	conf_anal.conformation_analysis(liste_dictionnaire)			# calcul des variables d'interet et ajout dans les dictionnaires
 
 	#string globale servant a donner le bon nom au dossier et fichiers en fonction du nombre de conformations analysees et de la methode pour le calcul du centre de masse
