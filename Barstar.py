@@ -57,6 +57,7 @@ def conformation_analysis(l_dict) :
 	distance(l_dict)
 	rayonGiration(l_dict)
 	corEnfouissementFlexibilite_conf(l_dict[1])
+	corEnfouissementFlexibilite_res(l_dict[0])
 
 #-----------------------------------------------------------------------
 def dictionnaire() :
@@ -362,12 +363,13 @@ def __RMSDres(d_ref,d_conf) :
 
 	d_ref["RMSDres_mean"] = list()
 	d_ref["RMSDres_sd"] = list()
+	d_ref["list_RMSDres"] = list()
 
 	for i in range(len(l_res)) :
 		l_rmsd = list() # liste contenant les valeurs des RMSD d'un residu pour toutes ses conformations
 		for conf in d_conf["liste_conformations"] :
 			l_rmsd.append(d_conf[conf]["RMSD"][i])
-		
+		d_ref["list_RMSDres"].append(l_rmsd)
 		d_ref["RMSDres_mean"].append(moyenne(l_rmsd))
 		d_ref["RMSDres_sd"].append(ecart_type(l_rmsd))
 
@@ -435,14 +437,16 @@ def __distanceRes(d_ref, d_conf) :
 
 	d_ref["enfRes_mean"] = list()
 	d_ref["enfRes_sd"] = list()
+	d_ref["list_enfRes"] = list()
 
 	for i in range(len(l_res)) :
 		l_enf = list()
 		for conf in d_conf["liste_conformations"] :
 			l_enf.append(d_conf[conf]["enfouissement"][i])
-		
+		d_ref["list_enfRes"].append(l_enf)
 		d_ref["enfRes_mean"].append(moyenne(l_enf))
 		d_ref["enfRes_sd"].append(ecart_type(l_enf))
+
 
 
 
@@ -526,14 +530,15 @@ def corEnfouissementFlexibilite_conf(d_conf) :
 	return d_conf["corEnfFlexi_conf"]
 
 
-# def corEnfouissementFlexibilite_ref(d_ref) :
-# 	Calcul de la correlation entre l'enfouissement des residus et leur flexibilite en fonction du residu.
-# 	d_ref["corEnfFlexi_ref"] = [list(), list()] # correlation et pvaleur
-# 	for i in range(len(d_ref["enfRes_mean"])) :
-# 		cor = pearsonr(d_ref["enfRes_mean"][i],d_ref["RMSDres_mean"][i])
-# 		d_ref["corEnfFlexi_ref"][0].append(cor[0])
-# 		d_ref["corEnfFlexi_ref"][1].append(cor[1])
-# 	return d_ref["corEnfFlexi_ref"]
+def corEnfouissementFlexibilite_res(d_ref) :
+	#Calcul de la correlation entre l'enfouissement des residus et leur flexibilite en fonction du residu.
+	d_ref["corEnfFlexi_ref"] = [list(), list()] # correlation et pvaleur
+	for i in range(len(d_ref["list_enfRes"])) :
+		cor = pearsonr(d_ref["list_enfRes"][i],d_ref["list_RMSDres"][i])
+		d_ref["corEnfFlexi_ref"][0].append(cor[0])
+		d_ref["corEnfFlexi_ref"][1].append(cor[1])
+	return d_ref["corEnfFlexi_ref"]
+
 
 #-----------------------------------------------------------------------
 # PARTIE 6 : ECRITURE DES RESULTATS
@@ -731,9 +736,11 @@ def plotFlexibiteEnfouissement(d_conf) :
 
 #-----------------------------------------------------------------------
 def plotLocal(d_ref) :
+	#Appel des fonctions de plot pour les graphes de l'analyse locale
 	plotDistanceLocal(d_ref)
 	plotRMSDLocal(d_ref)
-	corEnfouissementFlexibilite_ref(d_ref)
+	plotFlexibiteEnfouissement_residus(d_ref)
+	
 
 def plotDistanceLocal(d_ref) :
 	# plt.subplot(311)
@@ -787,21 +794,23 @@ def plotRMSDLocal(d_ref) :
 	plt.title('RMSD moyen (+/- ecart-type), par rapport a la reference, de la position \ndes residus pour chaque conformation, en fonction du residu')
 	plt.show()
 
-# def plotFlexibiteEnfouissement_residus(d_ref) :
-# 	plt.subplot(211)
-# 	plt.plot(d_ref["corEnfFlexi_ref"][0])
-# 	plt.title('Correlation de la Flexibilite moyenne des residus\n et leur Enfouissement moyen, en fonction des residus')
-# 	plt.xlabel('Residus')
-# 	plt.ylabel('Correlation')
+
+def plotFlexibiteEnfouissement_residus(d_ref) :
+	plt.subplot(211)
+	plt.plot(d_ref["corEnfFlexi_ref"][0])
+	plt.title("Correlation entre la Flexibilite et l'Enfouissement de chaque residu \nde chaque conformation, en fonction des residus")
+	plt.xlabel('Residus')
+	plt.ylabel('Correlation')
 	
-# 	plt.subplot(212)
-# 	plt.plot(d_ref["corEnfFlexi_ref"][1])
-# 	plt.title('p-value de la Correlation Flexibilite/Enfouissement moyens \n en fonction des residus')
-# 	plt.xlabel('Residus')
-# 	plt.ylabel('p-valeur')
+	plt.subplot(212)
+	plt.plot(d_ref["corEnfFlexi_ref"][1])
+	plt.axhline(y=0.05,ls='--',color='black')
+	plt.title('p-value de la Correlation Flexibilite/Enfouissement \n en fonction des residus')
+	plt.xlabel('Residus')
+	plt.ylabel('p-valeur')
 	
-# 	plt.tight_layout()
-# 	plt.show()
+	plt.tight_layout()
+	plt.show()
 
 #-----------------------------------------------------------------------
 # MAIN
