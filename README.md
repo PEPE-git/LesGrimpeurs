@@ -58,11 +58,10 @@ Utilisez main_Barstar.py pour obtenir toutes les informations pertinentes quant 
  API
  ---
 Le projet est composé de plusieurs fichiers correspondants aux fonctions du programme :
-
-    Parsing_dico : Vérification du bon usage du programme et Parsing des fichiers pdb en argument.
-    Conformation_analysis : Calcul des paramètres permettant l'analyse des fichiers pdb.
-    Ecriture : Ecriture des fichiers excel de sortie et création du dossier dans lequel ils seront enregistrés.
-    Graphes : Représentations graphiques pertinentes des parametres calculés.
+-Parsing_dico : Vérification du bon usage du programme et Parsing des fichiers pdb en argument.
+-Conformation_analysis : Calcul des paramètres permettant l'analyse des fichiers pdb.
+-Ecriture : Ecriture des fichiers excel de sortie et création du dossier dans lequel ils seront enregistrés.
+-Graphes : Représentations graphiques pertinentes des parametres calculés.
 
  License
  -------
