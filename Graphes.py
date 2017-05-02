@@ -12,13 +12,22 @@ import matplotlib.pyplot as plt
 
 import Conformation_analysis as conf_anal
 
+
+'''
+Fonction Graphes du projet BARSTAR
+Representations graphiques pertinentes des parametres calcules afin d'analyser les changemements conformationnels globaux et locaux.
+Et enregistrement des images.
+
+'''
+
+
 #-----------------------------------------------------------------------
 # GRAPHIQUES
 #-----------------------------------------------------------------------
 
 def plotRes(l_dict) :
 	'''
-	Affiche et enregistre dans le fichier correspondant les plot de l'anayle globale, puis ceux de l'analyse locale
+	Affichage ou non, et enregistrement dans le fichier correspondant les plots de l'anayle globale, puis ceux de l'analyse locale
 	'''
 	centreMasse = conf_anal.choixMeth()
 	global type_analyse
@@ -39,13 +48,14 @@ def plotRes(l_dict) :
 
 
 def plotGlobal(d_conf) :
+	#plots de l'analyse globale
 	plotGiration(d_conf)
 	plotDistance(d_conf)
 	plotGlobalRMSD(d_conf)
 	plotFlexibiteEnfouissement(d_conf)
 	
 def plotGiration(d_conf) :
-
+	#plot du Rayon de Giration moyen en fonction des conformations
 	plt.title('Rayon de Giration en fonction des conformations')
 	plt.plot(d_conf["rayonGiration"])
 	plt.axhline(y=d_conf["rayonGiration"][0],ls='--',color='black')
@@ -62,7 +72,7 @@ def plotGiration(d_conf) :
 		plt.show()
 
 def plotDistance(d_conf) :
-
+	#plot de la distance moyenne des residus au centre de masse en fonction des conformations
 	moy = d_conf["distance_moy"]
 	sd = d_conf["distance_sd"]
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
@@ -83,7 +93,7 @@ def plotDistance(d_conf) :
 		plt.show()
 
 def plotGlobalRMSD(d_conf) :
-
+	#plot du RMSD moyen en fonction des conformations
 	moy = d_conf["RMSDmoy"]
 	sd = d_conf["RMSDmoy_sd"]
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
@@ -106,6 +116,7 @@ def plotGlobalRMSD(d_conf) :
 
 
 def plotFlexibiteEnfouissement(d_conf) :
+	#plot de la correlation entre la flexibilite et l'enfouissement moyens des residus, en fonction des conformations
 	plt.subplot(211)
 	plt.plot(d_conf["corEnfFlexi_conf"][0])
 	plt.title('Correlation de la Flexibilite moyenne des residus\n et leur Enfouissement moyen, en fonction des conformations')
@@ -130,22 +141,18 @@ def plotFlexibiteEnfouissement(d_conf) :
 #-----------------------------------------------------------------------
 def plotLocal(d_ref) :
 	#Appel des fonctions de plot pour les graphes de l'analyse locale
+	
 	plotDistanceLocal(d_ref)
 	plotRMSDLocal(d_ref)
 	plotFlexibiteEnfouissement_residus(d_ref)
 
 def plotDistanceLocal(d_ref) :
+	#plot de la distance moyenne des residus au centre de masse en fonction des residus
 
 	moy = d_ref["enfRes_mean"]
 	sd = d_ref["enfRes_sd"]
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
-
-
-	# plt.subplot(311)
- # 	plt.plot(d_ref["enfRes_mean"])
- # 	plt.xlabel('Conformation')
- # 	plt.ylabel('Distance')
  	
  	plt.subplot(211)
  	plt.plot(d_ref["enfRes_sd"])
@@ -173,16 +180,12 @@ def plotDistanceLocal(d_ref) :
 
 
 def plotRMSDLocal(d_ref) :
+	#plot du RMSD moyen en fonction des residus
+	
 	moy = d_ref["RMSDres_mean"]
 	sd = d_ref["RMSDres_sd"]
 	moy_s = [x+y for (x,y) in zip(moy,sd)]
 	moy_i = [x-y for (x,y) in zip(moy,sd)]
-	
-
-	# plt.subplot(311)
- # 	plt.plot(d_ref["RMSDres_mean"])
- # 	plt.xlabel('Conformation')
- # 	plt.ylabel('RMSD')
  	
  	plt.subplot(211)
  	plt.plot(d_ref["RMSDres_sd"])
@@ -210,6 +213,7 @@ def plotRMSDLocal(d_ref) :
 
 
 def plotFlexibiteEnfouissement_residus(d_ref) :
+	#plot de la correlation entre la flexibilite et l'enfouissement moyens des residus, en fonction des residus
 	plt.subplot(211)
 	plt.plot(d_ref["corEnfFlexi_ref"][0])
 	plt.title("Correlation entre la Flexibilite et l'Enfouissement de chaque residu \nde chaque conformation, en fonction des residus")
@@ -231,3 +235,8 @@ def plotFlexibiteEnfouissement_residus(d_ref) :
 	global decision
 	if ((decision == 'O') | (decision == 'o')) :
 		plt.show()
+
+
+
+
+

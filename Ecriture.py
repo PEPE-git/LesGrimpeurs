@@ -11,16 +11,26 @@ import csv
 
 import Conformation_analysis as conf_anal
 
+'''
+Fonction Ecriture du projet BARSTAR
+Creation du dossier (nom fonction du nombre de conformations analysees et de la methode pour le centre de masse chosie)
+dans lequel seront ecrits et enregistres les resultats (tableaux excel des valeurs des parametres calcules et images des graphes)
+
+'''
 
 
 #-----------------------------------------------------------------------
-# PARTIE 6 : ECRITURE DES RESULTATS
+# ECRITURE DES RESULTATS
 #-----------------------------------------------------------------------
 
 
 def ecriture(l_dict,methode) :
 
-
+	'''
+	Creation du dossier de sortie s'il n'existe pas.
+	Verification que les fichiers de sortie n'existent pas deja dans le dossier.
+	
+	'''
 
 	if not os.path.exists('Barstar_Results_'+methode+'/'):
 		os.makedirs('Barstar_Results_'+methode)
@@ -39,6 +49,7 @@ def ecriture(l_dict,methode) :
 
 def __verificationfFichier(output) :
 	#Si le fichier existe deja, demande si l'utilisateur veut le remplacer ou non
+	#si non, entrer un nouveau non de fichier.
 
 	if (os.path.exists(output)) :
 		decision = raw_input("\nFichier de sortie "+str(output)+" deja existant : Voulez vous l'ecraser ? O/N\n")
@@ -58,9 +69,9 @@ def __verificationfFichier(output) :
 
 
 def __outputGlobaux(output, d_ref, d_conf, x) :
-	#Ecriture des resultats dans un tableau excel
+	#Ecriture des valeurs des parametres de l'analyse locale dans un tableau excel
 
-	# try:
+	try:
 		with open(output, "w") as f:
 			fieldnames = ['Conf', 'Rayon Giration','Distance','ecart-type Distance','RMSD','ecart-type RMSD','Ratio Giration','Correlation','p-value Correlation']
 			writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -81,13 +92,13 @@ def __outputGlobaux(output, d_ref, d_conf, x) :
 				pvalue = d_conf["corEnfFlexi_conf"][1][i]
 				writer.writerow({'Conf': num, 'Rayon Giration': round(rayonG,x), 'Distance': round(d_moy,x), 'ecart-type Distance': round(d_sd,x), 'RMSD': round(rmsd,x), 'ecart-type RMSD': round(rmsd_sd,x), 'Ratio Giration': round(ratio_gir,x), 'Correlation': round(cor,x),'p-value Correlation': round(pvalue,x)})	
 
-	# except:
-	# 	print("Erreur chargement fichier"+output+"\n")
-	# 	sys.exit(0)
+	except:
+		print("Erreur chargement fichier"+output+"\n")
+		sys.exit(0)
 
 
 def __outputLocaux(output, d_ref, x) :
-	#Ecriture des resultats dans un tableau excel
+	#Ecriture des valeurs des parametres de l'analyse globale dans un tableau excel
 
 	try:
 		with open(output, "w") as f:

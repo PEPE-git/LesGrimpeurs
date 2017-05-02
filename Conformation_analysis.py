@@ -11,11 +11,16 @@ from math import sqrt
 from scipy.stats.stats import pearsonr
 import numpy as np
 
+'''
+Fonction Conformation_analysis du projet BARSTAR
+On calcule ici, a partir des dictionnaires des fichiers pdb donnes en argument, les parametres permettant les analyses conformationnelles. 
+On prend en compte la methode de calcul du centre de masse, aussi choisie en argument
+'''
 
 def choixMeth() :
 	'''
 	Deux methodes de calcul sont proposees :
-	- soit en utilisant la position des carbones alpha (hyp. representatif des residus)
+	- soit en utilisant la position des carbones alpha
 	- soit en calculant la position des residus a partir du centre de masse de l'ensemble des atomes les consituant
 	'''
 	global centreMasse
@@ -45,11 +50,14 @@ def conformation_analysis(l_dict) :
 
 
 #-----------------------------------------------------------------------
-# PARTIE 2 CALCUL DU CENTRE DE MASSE
+# CALCUL DU CENTRE DE MASSE
 #-----------------------------------------------------------------------
 
 def centreMasseCalc(l_dict) :
-	print "Calcul des Centres de Masse des Residus et des proteines"
+	'''
+	Calculs du centre de masse de chaque residu et de chaque conformation
+	'''
+	print "\nCalcul des Centres de Masse des residus et des proteines"
 	__centreMasseResidus(l_dict[0])
 	__centreMasseResidus(l_dict[1])
 	__centreMasseProteine(l_dict[0])
@@ -168,7 +176,7 @@ def __centreMasseResAll(d_prot) :
 			d_prot[conf]["CM_res"]["z"].append(zmoy)
 
 #-----------------------------------------------------------------------
-# PARTIE 3 : CALCUL DU RMSD
+# CALCUL DU RMSD
 #-----------------------------------------------------------------------
 '''
 Le RMSD est considere comme la distance moyenne entre les residus
@@ -247,7 +255,7 @@ def __RMSDres(d_ref,d_conf) :
 
 
 #-----------------------------------------------------------------------
-# PARTIE 4 : DISTANCE
+# CALCUL DE LA DISTANCE
 #-----------------------------------------------------------------------
 '''
 Calcul de la distance entre chaque residu et le centre de Masse de la conformation.
@@ -323,7 +331,7 @@ def __distanceRes(d_ref, d_conf) :
 
 
 #-----------------------------------------------------------------------
-# PARTIE 5 : RAYON DE GIRATION
+# CALCUL DU RAYON DE GIRATION
 #-----------------------------------------------------------------------
 '''
 Le rayon de giration est calcule comme etant la distance maximale entre 
@@ -381,7 +389,9 @@ def corEnfouissementFlexibilite_conf(d_conf) :
 
 
 def corEnfouissementFlexibilite_res(d_ref) :
-	#Calcul, pour chaque residu de chaque conformation, de la correlation entre l'enfouissement du residu et sa flexibilite.
+	'''
+	Calcul, pour chaque residu de chaque conformation, de la correlation entre l'enfouissement du residu et sa flexibilite.
+	'''
 	d_ref["corEnfFlexi_ref"] = [list(), list()] # correlation et pvaleur
 	for i in range(len(d_ref["list_enfRes"])) :
 		cor = pearsonr(d_ref["list_enfRes"][i],d_ref["list_RMSDres"][i])

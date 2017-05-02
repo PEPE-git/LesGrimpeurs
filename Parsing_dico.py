@@ -8,6 +8,12 @@ Description: Projet Barstar
 
 import sys, os
 
+'''
+Fonction Parsing_dico du projet BARSTAR
+On verifie ici le bon usage du programme (bon nombre et bon ordre des arguments)
+On effectue egalement le parsing, sous forme de dictionnaires, des fichiers pdb donnes en arguments
+'''
+
 #-----------------------------------------------------------------------
 def	__usage(arguments) :
 	# Verifie que l'utilisateur a fourni le bon nombre d'arguments
@@ -29,14 +35,15 @@ def __erreurMes() :
 def dictionnaire() :
 	global argv
 	
-	# Verification : les fichiers ont ete fournis dans le bon ordre
+	# Verification que les fichiers ont ete fournis dans le bon ordre
 	__usage(sys.argv)
 	
 	# Transformation des fichiers pdb en dictionnaires
+	# Chaque dictionnaire possede la position de chaque atome de chaque residu de chaque conformation.
 	dico1 = __parsePDBMultiConf(sys.argv[1])
 	dico2 = __parsePDBMultiConf(sys.argv[2])
 
-	# Verification ordre des fichiers
+	# Verification de l'ordre des fichiers
 	if (__verifData(dico1, dico2) == 1) :
 		__inversion(dico1, dico2)
 	
@@ -45,8 +52,8 @@ def dictionnaire() :
 
 def __parsePDBMultiConf(infile) :
 	"""
-	Cette fonction permet de parser un fichier pdb. Conversion en 
-	dictionnaire directement utilisable dans le script.
+	Cette fonction permet de parser un fichier pdb.
+	Conversion en dictionnaire directement utilisable dans le script.
 	"""
 
 	try:
@@ -57,7 +64,7 @@ def __parsePDBMultiConf(infile) :
 		print("Erreur chargement fichier : verifiez existence fichier et relancer\n")
 		sys.exit(0) # Arret execution programme
 
-	print "Parsing de "+infile
+	print "\nParsing de "+infile
 	d_PDB = dict()
 	d_PDB["liste_conformations"] = list()
 
