@@ -6,10 +6,11 @@ Date: 02/05/2017
 Description: Projet Barstar
 """
 
-
+#Import des modules
 import sys, os
 import matplotlib.pyplot as plt
 
+#Import des fonctions
 import Conformation_analysis as conf_anal
 
 
@@ -29,6 +30,8 @@ def plotRes(l_dict) :
 	'''
 	Affichage ou non, et enregistrement dans le fichier correspondant les plots de l'anayle globale, puis ceux de l'analyse locale
 	'''
+	
+	#reutilisation de la fonction choixMeth() pour redefinir la string globale type_analyse servant a nommer les fichiers/dossiers.
 	centreMasse = conf_anal.choixMeth()
 	global type_analyse
 	type_analyse=centreMasse+"_"+str(len(l_dict[1]["liste_conformations"])-1)

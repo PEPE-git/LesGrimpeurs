@@ -9,11 +9,7 @@ Description: Projet Barstar
 # usage : python2 main_Barstar.py start_prot_only.pdb md_prot_only_skip100.pdb all
 
 #Import des modules
-import sys, os
-from math import sqrt
-import matplotlib.pyplot as plt
-from scipy.stats.stats import pearsonr
-import csv
+import os
 
 #Import des fonctions
 import Parsing_dico as parse
@@ -56,9 +52,8 @@ if __name__ == '__main__':
 
 
 
-	#string globale servant a donner le bon nom aux dossiers et fichiers en fonction du nombre de conformations analysees et de la methode pour le calcul du centre de masse
+	#string servant a donner le bon nom aux dossiers et fichiers en fonction du nombre de conformations analysees et de la methode pour le calcul du centre de masse
 	#Pour l'analyse d'un fichier pdb de 200 conformations avec la methode d'approximation du centre de masse des residus par la position du carbone alpha : type_analyse= "CA_200"
-	global type_analyse
 	type_analyse=centreMasse+"_"+str(len(liste_dictionnaire[1]["liste_conformations"])-1)	
 
 

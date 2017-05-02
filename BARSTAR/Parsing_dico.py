@@ -6,6 +6,7 @@ Date: 02/05/2017
 Description: Projet Barstar
 """
 
+#Import des modules
 import sys, os
 
 '''

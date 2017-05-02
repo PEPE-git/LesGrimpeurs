@@ -6,10 +6,8 @@ Date: 02/05/2017
 Description: Projet Barstar
 """
 
-import sys, os
-import csv
-
-import Conformation_analysis as conf_anal
+#Import des modules
+import os, csv
 
 '''
 Fonction Ecriture du projet BARSTAR

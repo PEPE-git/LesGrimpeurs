@@ -6,10 +6,10 @@ Date: 02/05/2017
 Description: Projet Barstar
 """
 
+#Import des modules
 import sys, os
 from math import sqrt
 from scipy.stats.stats import pearsonr
-import numpy as np
 
 '''
 Fonction Conformation_analysis du projet BARSTAR
