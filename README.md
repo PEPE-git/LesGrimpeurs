@@ -34,19 +34,19 @@ Utilisez main_Barstar.py pour obtenir toutes les informations pertinentes quant 
 	l_dict=[barstar_conf, barstar_ref]
 
 	# Calcul du centre de masse des résidus et de chaque conformation
-		centreMasseCalc(l_dict)	
+	centreMasseCalc(l_dict)	
 
 	# Calcul du RMSD des residus de chaque conformation par rapport à la référence			
-		RMSD(l_dict)	
+	RMSD(l_dict)	
 
 	# Calcul de la distance entre les résidus et le CdM pour chaque conformation			
-		distance(l_dict)
+	distance(l_dict)
 
 	# Calcul du Rayon de Giration pour chaque conformation				
-		rayonGiration(l_dict)
+	rayonGiration(l_dict)
 					
 	# Calcul de la corrélation entre le Rayon de Giration (Enfouissement) et la Flexibilité (RMSD) pour chaque conformation
-		corEnfouissementFlexibilite_conf(l_dict)
+	corEnfouissementFlexibilite_conf(l_dict)
 	
 # Ecriture des resultats dans les tableaux excel de sortie et enregistrement dans les dossiers correspondants.
 	ecriture(l_dict,type_analyse)
