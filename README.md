@@ -2,6 +2,11 @@
  ------------
 Projet BARstar de DA SILVA OPHELIE et MERCKAERT PIERRE
 
+ To do:
+ ------
+ 
+-Translate in English 
+
  Synopsis
  --------
 
